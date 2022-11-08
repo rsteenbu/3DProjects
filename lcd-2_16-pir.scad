@@ -18,7 +18,6 @@ x = (enclosure_stuff == "LCD+PIR") ? lcd_size.x + pir_size.x + gap + margin * 2:
     (enclosure_stuff == "LCD")     ? lcd_size.x + gap + margin * 2:
     (enclosure_stuff == "PIR")     ? pir_size.x + gap + margin * 2:140;
 
-
 ydistribute(spacing=90) {
   if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
   if (print_backplate) down(1) backplate([x,55,2]); 
@@ -149,6 +148,21 @@ module lcd2_16() {
     back(16) left(13) cuboid([40,4,5], anchor=BOTTOM);
 }
 
+module prismoidal(size) {
+    scale=0.5;
+    attachable(CENTER, 0, UP, size=size, size2=[size.x, size.y] * scale) {
+        hull() {
+            up(size.z/2-0.005)
+                linear_extrude(height=0.01, center=true)
+                    square([size.x*scale,size.y], center=true);
+            down(size.z/2-0.005)
+                linear_extrude(height=0.01, center=true)
+                    square([size.x,size.y], center=true);
+        }
+        children();
+    }
+}
+
 module pir() {
   opening_size=[24.5,24.5,5];
   header_size=[8,2,5.5];
@@ -167,19 +181,4 @@ module pir() {
           }
         }
   }
-}
-
-module prismoidal(size) {
-    scale=0.5;
-    attachable(CENTER, 0, UP, size=size, size2=[size.x, size.y] * scale) {
-        hull() {
-            up(size.z/2-0.005)
-                linear_extrude(height=0.01, center=true)
-                    square([size.x*scale,size.y], center=true);
-            down(size.z/2-0.005)
-                linear_extrude(height=0.01, center=true)
-                    square([size.x,size.y], center=true);
-        }
-        children();
-    }
 }
