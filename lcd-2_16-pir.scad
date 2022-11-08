@@ -2,10 +2,6 @@ include <BOSL2/std.scad>;
 include <BOSL2/metric_screws.scad>;
 include <BOSL2/screws.scad>;
 
-LCD = true;
-PIR = false;
-LCD_PIR = false;
-
 post_hole_size = 1.8;
 wall_width = 2;
 margin=10.5;
@@ -13,40 +9,36 @@ gap=22;
 lcd_size=[72,25,8];
 pir_size=[25,34,4];
 
-// 140 =  72 + 25 + 10.5*2
+print_enclosure = true;
+print_backplate = true;
 
-ydistribute(spacing=90){
-   if (LCD_PIR) {
-     x = lcd_size.x + pir_size.x + margin * 2 + gap;
-     lcd2_16_enclosure([x,55,20]); 
-   } else if (LCD) {
-     x = lcd_size.x + margin * 2;
-     lcd2_16_enclosure([x,55,20]); 
-   } else if (PIR) {
-     x = pir_size.x + margin * 2;
-     lcd2_16_enclosure([x,55,20]); 
-   }
-   //down(1) xrot(180) backplate([140,55,20], 2); 
-   //inside_space([130,55,20]);
-   //lcd2_16([72,25,8]);
-   //pir([24,33,4]);
+// LCD, PIR, LCD+PIR
+enclosure_stuff = "LCD+PIR";
+x = (enclosure_stuff == "LCD+PIR") ? lcd_size.x + pir_size.x + gap + margin * 2:
+    (enclosure_stuff == "LCD")     ? lcd_size.x + gap + margin * 2:
+    (enclosure_stuff == "PIR")     ? pir_size.x + gap + margin * 2:140;
+
+
+ydistribute(spacing=90) {
+  if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
+  if (print_backplate) down(1) backplate([x,55,2]); 
 }
 
-module backplate(size=[100,100,100]) {
-   tolerance = .2;
+module backplate(size) {
+   tolerance = .15;
    lip_width = 3;
-   lip_height = 6;
-   inner_lip_height = lip_height + 3 - tolerance;
+   lip_height = 3;
+   inner_lip_height = size.z + lip_height - tolerance;
    screwpost_size = 7;
    
    diff("holes")
-   cuboid([size.x, size.y], wall_width) {
-      attach([TOP]) {
+   cuboid([size.x, size.y, wall_width]) {
+      attach([BOTTOM]) {
         // outer lip
-        back(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, lip_height], anchor=BOTTOM);
-        fwd (size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, lip_height], anchor=BOTTOM);
-        left(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, lip_height], anchor=BOTTOM);
-        right(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, lip_height], anchor=BOTTOM);
+        back(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z], anchor=BOTTOM);
+        fwd (size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z], anchor=BOTTOM);
+        left(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z], anchor=BOTTOM);
+        right(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z], anchor=BOTTOM);
         // inner lip
         back(size.y / 2 + wall_width/2 - (wall_width*2 + tolerance)) cuboid([size.x - 2*(wall_width + tolerance), wall_width, inner_lip_height], anchor=BOTTOM);
         fwd (size.y / 2 + wall_width/2 - (wall_width*2 + tolerance)) cuboid([size.x - 2*(wall_width + tolerance), wall_width, inner_lip_height], anchor=BOTTOM);
@@ -62,7 +54,7 @@ module backplate(size=[100,100,100]) {
           }
         }
       }
-      attach([BOTTOM]) {
+      attach([TOP]) {
         tag("holes") {
           head_hole_size = 3;
           screwhole_xpos = (size.x / 2 - wall_width - 2) - .5;
@@ -85,13 +77,6 @@ module backplate(size=[100,100,100]) {
    }
  }
 
-module backplate_screwholes() {
-  cylinder(h=20, r=post_hole_size, anchor=BOTTOM)
-    attach([LEFT+FRONT]) {
-        fwd(0) down(1) cuboid([5.4,2,8]);
-    }
-}
-
 module lcd2_16_enclosure(size) {
   diff("inside")
   cuboid(size, chamfer=5, edges=[TOP], anchor=TOP) {
@@ -105,19 +90,26 @@ module lcd2_16_enclosure(size) {
         screwhole_xpos = size.x / 2 - wall_width - 2.5;
         screwhole_ypos = size.y / 2 - 5.5;
         move([screwhole_xpos, screwhole_ypos, -2]) rotate(0) backplate_screwholes();
-        move([screwhole_xpos, screwhole_ypos * -1, -2]) rotate(270) backplate_screwholes();
-        move([screwhole_xpos * -1, screwhole_ypos * -1, -2]) rotate(180) backplate_screwholes();
         move([screwhole_xpos * -1, screwhole_ypos, -2]) rotate(90) backplate_screwholes();
+        move([screwhole_xpos * -1, screwhole_ypos * -1, -2]) rotate(180) backplate_screwholes();
+        move([screwhole_xpos, screwhole_ypos * -1, -2]) rotate(270) backplate_screwholes();
       }
     }
   }
+}
+
+module backplate_screwholes() {
+  cylinder(h=20, r=post_hole_size, anchor=BOTTOM)
+    attach([LEFT+FRONT]) {
+        fwd(0) down(1) cuboid([5.4,2,8]);
+    }
 }
 
 module inside_space(inside_size) {
   diff("screwholes")
   cuboid(inside_size, anchor=BOTTOM) 
     attach([TOP], overlap=1) {
-      if (LCD || LCD_PIR) { 
+      if (enclosure_stuff == "LCD" || enclosure_stuff == "LCD+PIR") { 
         lcd_pos = (inside_size.x / 2 - lcd_size.x / 2 - margin);
         right(lcd_pos) lcd2_16();
         tag("screwholes") {
@@ -129,7 +121,7 @@ module inside_space(inside_size) {
         }
       }
 
-      if (PIR || LCD_PIR) { 
+      if (enclosure_stuff == "PIR" || enclosure_stuff == "LCD+PIR") { 
         pir_pos = (inside_size.x / 2 - pir_size.x / 2 - margin);
         left(pir_pos) pir();
         tag("screwholes") {
