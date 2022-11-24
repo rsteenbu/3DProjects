@@ -6,7 +6,7 @@ include <BOSL2/screws.scad>;
 //enclosure_size = [139.5, 55, 23];
 enclosure_size = [139.5, 55, 13];
 backplate_depth = 13;
-arduino_inside = true;
+arduino_inside = false;
 
 wall_width = 2;
 post_hole_size = 1.8;
@@ -33,17 +33,12 @@ print_backplate = true;
 
 // LCD, PIR, LCD+PIR
 enclosure_stuff = "LCD+PIR";
-//x = (enclosure_stuff == "LCD+PIR") ? lcd_size.x + pir_size.x + gap + margin * 2:
-//                                           72 + 24.5 + 22 + 10.5*2
-//    (enclosure_stuff == "LCD")     ? lcd_size.x + margin * 2:
-//    (enclosure_stuff == "PIR")     ? pir_size.x + margin * 2:140;
 
 ydistribute(spacing=65) {
   //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
   if (print_backplate)  backplate([enclosure_size.x,enclosure_size.y,backplate_depth]); 
   if (print_enclosure)  lcd2_16_enclosure(enclosure_size); 
 }
-
 
 
 module backplate(size) {
@@ -100,7 +95,9 @@ module backplate(size) {
         }
       }
 
-      position(BOTTOM+RIGHT) back(18) left(connector_pos_from_edge+5) connector(4_pin_connector_size, anchor=RIGHT+TOP);
+      if(arduino_inside) {
+	position(BOTTOM+RIGHT) back(18) left(connector_pos_from_edge+5) connector(4_pin_connector_size, anchor=RIGHT+TOP);
+      }
   }
 }
 
