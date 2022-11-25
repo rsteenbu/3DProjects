@@ -4,9 +4,10 @@ include <BOSL2/screws.scad>;
 
 //faceplate stuff
 //enclosure_size = [139.5, 55, 23];
-enclosure_size = [139.5, 55, 13];
+//backplate_depth = 13;
+enclosure_size = [139.5, 62, 14];
 backplate_depth = 13;
-arduino_inside = false;
+arduino_inside = true;
 
 wall_width = 2;
 post_hole_size = 1.8;
@@ -36,7 +37,9 @@ enclosure_stuff = "LCD+PIR";
 
 ydistribute(spacing=65) {
   //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
-  if (print_backplate)  backplate([enclosure_size.x,enclosure_size.y,backplate_depth]); 
+  if (print_backplate)  
+    if (arduino_inside) backplate([enclosure_size.x,enclosure_size.y,backplate_depth+10]); 
+    else backplate([enclosure_size.x,enclosure_size.y,backplate_depth]); 
   if (print_enclosure)  lcd2_16_enclosure(enclosure_size); 
 }
 
@@ -52,12 +55,22 @@ module backplate(size) {
         back(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z], anchor=BOTTOM);
         fwd (size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z], anchor=BOTTOM);
         left(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z], anchor=BOTTOM)
-          attach(RIGHT) {
-	    if (enclosure_stuff == "LCD" || enclosure_stuff == "LCD+PIR") {
-	      left(7) fwd(4) connector(3_pin_connector_size, anchor=FRONT);
-	    }
-	    if (enclosure_stuff == "PIR" || enclosure_stuff == "LCD+PIR") {
-	      right(7) fwd(4) connector(4_pin_connector_size, anchor=FRONT);
+	  attach(RIGHT) {
+	    if (arduino_inside) {
+		//sensor connectors
+		move([-7,-2,0]) connector(3_pin_connector_size, anchor=FRONT);
+		move([-7,-10,0]) connector(3_pin_connector_size, anchor=FRONT);
+
+		//power connectors
+		move([7,-2,0]) connector(3_pin_connector_size, anchor=FRONT);
+		move([7,-10,0]) connector(3_pin_connector_size, anchor=FRONT);
+	    } else {
+	      if (enclosure_stuff == "LCD" || enclosure_stuff == "LCD+PIR") {
+		left(7) fwd(4) connector(3_pin_connector_size, anchor=FRONT);
+	      }
+	      if (enclosure_stuff == "PIR" || enclosure_stuff == "LCD+PIR") {
+		right(7) fwd(4) connector(4_pin_connector_size, anchor=FRONT);
+	      }
 	    }
 	  }
         right(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z], anchor=BOTTOM);
@@ -75,6 +88,19 @@ module backplate(size) {
             move([inside_xpos * x, inside_ypos  * y, 0]) cuboid([screwpost_size,screwpost_size,inner_lip_height], anchor=BOTTOM);
           }
         }
+
+        if (arduino_inside) {
+	  // PCB screwposts
+	  mounting_hole_xdistance = 61;;
+	  mounting_hole_ydistance = 46;
+	  for(x = [1, -1]) {
+	    for(y = [1, -1]) {
+	      move([ (mounting_hole_xdistance / 2) * x, (mounting_hole_ydistance / 2) * y, -1])  
+		cylinder(h=4, r=4, anchor=BOTTOM) 
+		attach([TOP], overlap=1) screw("M3", length=5, anchor=BOTTOM);
+	    }
+	  }
+	}
       }
       attach([TOP]) {
         tag("holes") {
@@ -89,15 +115,19 @@ module backplate(size) {
           }
           inside_xpos = size.x / 2 - (wall_width+tolerance) - 20;
           //mountintg holes
-          right(inside_xpos) up(1) fwd(size.y / 2 - wall_width - 10) cylinder(h=5, r=2.2, anchor=TOP);
-          right(inside_xpos - 80) up(1) fwd(size.y / 2 - wall_width - 10) cylinder(h=5, r=2.2, anchor=TOP);
+	  mounting_hole_distance_apart = 80;
+	  mounting_hole_distance_from_edge = 10;
+	  for(x = [1, -1]) {
+	    move([ (mounting_hole_distance_apart / 2) * x, size.y / 2 - wall_width - mounting_hole_distance_from_edge , 1])
+	      cylinder(h=5, r=2.2, anchor=TOP);
+	  }
           
         }
       }
 
-      if(arduino_inside) {
-	position(BOTTOM+RIGHT) back(18) left(connector_pos_from_edge+5) connector(4_pin_connector_size, anchor=RIGHT+TOP);
-      }
+      //if(arduino_inside) {
+//	position(BOTTOM+RIGHT) back(0) left(connector_pos_from_edge+5) connector(4_pin_connector_size, anchor=RIGHT+TOP);
+      //}
   }
 }
 
@@ -164,7 +194,7 @@ module inside_space(inside_size) {
           screwhole_ypos = inside_size.y / 2 - 3;
           for(x = [1, -1]) {
             for(y = [1, -1]) {
-              move([screwhole_xpos * x, screwhole_ypos * y, 10]) cylinder(h=inside_size.z-(lip_height + 2*tolerance), r=5, anchor=TOP);
+              move([screwhole_xpos * x, screwhole_ypos * y, 10]) cylinder(h=inside_size.z-(lip_height + 1), r=5, anchor=TOP);
             }
           }
           pcb_height = 1.50;
