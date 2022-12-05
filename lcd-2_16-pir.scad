@@ -33,8 +33,8 @@ support_height = wall_width + 3;
 4_pin_connector_size = [12.45, 5.95, support_height+5];
 
 connector_pos_from_edge = 13;
-print_enclosure = false;
-print_backplate = true;
+print_enclosure = true;
+print_backplate = false;
 
 // LCD, PIR, LCD+PIR
 enclosure_stuff = "LCD+PIR";
