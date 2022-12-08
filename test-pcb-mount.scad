@@ -3,61 +3,64 @@ include <BOSL2/std.scad>;
 include <BOSL2/metric_screws.scad>;
 include <BOSL2/screws.scad>;
 
-wall_width = 2;
-plate_size = [35, 62, wall_width];
-tolerance = .15;
-overlap = .5;
 print_pcb = false;
 
+pcb_thickness = 1.6;
+wall_width = 2;
+plate_size = [40, 70, wall_width];
+tolerance = .15;
+overlap = .5;
+
 mount_type="clip";  // scre or clip
-pcb_height = 10;
+pcb_height = 4;
+pcb_clip_size=[1.5,4.5];
 
 //arduino PCB stuff
-70x50_pcb_size = [70, 50, 1.5]; 
-70x50_PCB_HO = 2;   // PCB Hole Offset
+70x50_pcb_size = [50, 70]; 
 70x50_hole_diameter = 2;
+70x50_hole_distance=[46,66];
 
 //relay PCB stuff
-relay_pcb_size = [25.5, 51, 1.6];
-relay_PCB_HO=2.75;  //center of mounting hole from l and w sides
+relay_pcb_size = [25.5, 51];
 relay_hole_diameter = 2;
+relay_hole_distance=[20,45.26];
 
-esp32_pcb_size = [28.5, 50.6, 1.6];
-esp32_PCB_HO=2.5;  //center of mounting hole from l and w sides
-esp32_pcb_height = 9;
-esp32_hole_diameter = 3;
+beefcake_relay_pcb_size = [30.5, 62.3];
+beefcake_relay_hole_diameter = 3.25;
+beefcake_relay_hole_distance=[25.50,50.76];
 
 // mounting plate
 cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
 
 //pcb_mount(relay_pcb_size, relay_PCB_HO, "screw");
-pcb_mount(esp32_pcb_size, esp32_PCB_HO, esp32_pcb_height, esp32_hole_diameter, "clip");
+ydistribute(50) {
+  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+  cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
+  pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
+}
 
-module pcb_mount(pcb_size, HO, pcb_height=4, hole_diameter, mount_type) {
+module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter) {
   if(print_pcb) 
     color("lightgreen") up (wall_width + pcb_height) cuboid(pcb_size, anchor=BOTTOM);
-
-  for(x = [1, -1]) {
-    for(y = [1, -1]) {
-      move([((pcb_size.x / 2) - HO) * x, ((pcb_size.y / 2) - HO + tolerance) * y, wall_width - overlap]) {
-	if (mount_type == "screw")
-	  cylinder(h=pcb_height+overlap, r=4, $fn=45)
-	    attach(TOP, overlap=overlap) screw("M3", length=5+overlap, anchor=BOTTOM, $fn=45);
-	if (mount_type == "clip") {
-          pcb_clip_size=[4,1.5,pcb_height+pcb_size.z+overlap+hole_diameter/2];
-	  back((HO+pcb_clip_size.y/2) * y) 
-	  {
-	    //clip
-	    cuboid(pcb_clip_size, anchor=BOTTOM);
-	    up(pcb_clip_size.z-tolerance) right(pcb_clip_size.x/2) fwd(pcb_clip_size.y*.17*y) cylinder(h=pcb_clip_size.x, r=1, $fn=45, orient=LEFT);
-	  }
-
-	  //standoff
-	  //cuboid([4,5.2,pcb_height+overlap], anchor=BOTTOM)
-	  cuboid([4,4.5,pcb_height+overlap], anchor=BOTTOM) 
-	    attach(TOP) sphere(r=hole_diameter / 2, anchor=CENTER, $fn=45);
-	}
-      }
-    }
+  back(((relay_hole_distance.y / 2) + tolerance)) { 
+    pcb_clips(pcb_size, relay_hole_distance, hole_diameter);
+    fwd(relay_hole_distance.y) pcb_clips(pcb_size, relay_hole_distance, hole_diameter);
   }
+}
+
+module pcb_clips(pcb_size, relay_hole_distance, hole_diameter) {
+    standoff_x = pcb_size.x - relay_hole_distance.x+overlap;
+    for(x = [1, -1]) {
+	  // standoff 
+	  move([(relay_hole_distance.x / 2 )* x, 0, wall_width - overlap]) 
+	    cuboid([standoff_x,4.5,pcb_height+overlap], anchor=BOTTOM) 
+	    attach(TOP) sphere(r=hole_diameter / 2, anchor=CENTER, $fn=45);
+
+	  //clip
+	  pcb_clip_height=pcb_height+pcb_thickness+overlap+tolerance;
+	  move([(pcb_size.x  / 2 + pcb_clip_size.x/2 )* x, 0, wall_width - overlap])  {
+	    cuboid([pcb_clip_size.x, pcb_clip_size.y, pcb_clip_height], anchor=BOTTOM);
+	    up(pcb_clip_height+tolerance) right(pcb_clip_size.x/6*-x) fwd(pcb_clip_size.y/2) cylinder(h=pcb_clip_size.y, r=1, $fn=45, orient=BACK);
+	  }
+    }
 }
