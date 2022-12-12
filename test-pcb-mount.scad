@@ -30,25 +30,23 @@ beefcake_relay_hole_diameter = 3.25;
 beefcake_relay_hole_distance=[25.50,50.76];
 
 // mounting plate
-cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
+//cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
 
 //pcb_mount(relay_pcb_size, relay_PCB_HO, "screw");
-ydistribute(50) {
-  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
-  cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
-  pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
-}
+//  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+//  cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
+//  pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
 
-module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter) {
+module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance=0) {
   if(print_pcb) 
     color("lightgreen") up (wall_width + pcb_height) cuboid(pcb_size, anchor=BOTTOM);
   back(((relay_hole_distance.y / 2) + tolerance)) { 
-    pcb_clips(pcb_size, relay_hole_distance, hole_diameter);
-    fwd(relay_hole_distance.y) pcb_clips(pcb_size, relay_hole_distance, hole_diameter);
+    pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance);
+    fwd(relay_hole_distance.y) pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance);
   }
 }
 
-module pcb_clips(pcb_size, relay_hole_distance, hole_diameter) {
+module pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance) {
     standoff_x = pcb_size.x - relay_hole_distance.x+overlap;
     for(x = [1, -1]) {
 	  // standoff 
@@ -57,7 +55,7 @@ module pcb_clips(pcb_size, relay_hole_distance, hole_diameter) {
 	    attach(TOP) sphere(r=hole_diameter / 2, anchor=CENTER, $fn=45);
 
 	  //clip
-	  pcb_clip_height=pcb_height+pcb_thickness+overlap+tolerance;
+	  pcb_clip_height=pcb_height+pcb_thickness+overlap+clip_tolerance;
 	  move([(pcb_size.x  / 2 + pcb_clip_size.x/2 )* x, 0, wall_width - overlap])  {
 	    cuboid([pcb_clip_size.x, pcb_clip_size.y, pcb_clip_height], anchor=BOTTOM);
 	    up(pcb_clip_height+tolerance) right(pcb_clip_size.x/6*-x) fwd(pcb_clip_size.y/2) cylinder(h=pcb_clip_size.y, r=1, $fn=45, orient=BACK);
