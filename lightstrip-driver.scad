@@ -1,9 +1,9 @@
 include <BOSL2/std.scad>;
 include <BOSL2/metric_screws.scad>;
 include <BOSL2/screws.scad>;
-include <test-powersupply-mount.scad>;
-include <test-connector-mount.scad>;
-include <test-pcb-mount.scad>;
+include <powersupply-mount.scad>;
+include <box-connectors.scad>;
+include <pcb-mount.scad>;
 
 //faceplate stuff
 enclosure_size = [180, 100, 14];
