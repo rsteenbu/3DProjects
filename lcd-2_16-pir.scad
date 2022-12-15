@@ -11,8 +11,7 @@ arduino_inside = true;
 
 wall_width = 2;
 post_hole_size = 1.8;
-margin=10.5;
-gap=22;
+component_margin=10.5;
 
 lcd_size=[72,25,8];
 pir_size=[24.5,33.2,4];
@@ -217,7 +216,7 @@ module inside_space(inside_size) {
   cuboid(inside_size, anchor=TOP) 
     attach([TOP], overlap=1) {
       if (enclosure_stuff == "LCD" || enclosure_stuff == "LCD+PIR") { 
-        lcd_pos = (inside_size.x / 2 - lcd_size.x / 2 - margin);
+        lcd_pos = (inside_size.x / 2 - lcd_size.x / 2 - component_margin);
         right(lcd_pos) lcd2_16();
         tag("screwholes") {
           for(x = [1, -1]) {
@@ -229,7 +228,7 @@ module inside_space(inside_size) {
       }
 
       if (enclosure_stuff == "PIR" || enclosure_stuff == "LCD+PIR") { 
-        pir_pos = (inside_size.x / 2 - pir_size.x / 2 - margin);
+        pir_pos = (inside_size.x / 2 - pir_size.x / 2 - component_margin);
         left(pir_pos) pir();
         tag("screwholes") {
           //Screwposts

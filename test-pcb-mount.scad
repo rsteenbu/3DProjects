@@ -9,7 +9,7 @@ pcb_thickness = 1.6;
 wall_width = 2;
 plate_size = [40, 70, wall_width];
 tolerance = .15;
-overlap = .5;
+//overlap = .5;
 
 mount_type="clip";  // scre or clip
 pcb_height = 4;
@@ -41,24 +41,25 @@ module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance=0
   if(print_pcb) 
     color("lightgreen") up (wall_width + pcb_height) cuboid(pcb_size, anchor=BOTTOM);
   back(((relay_hole_distance.y / 2) + tolerance)) { 
-    pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance);
-    fwd(relay_hole_distance.y) pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance);
+    down(overlap) pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance);
+    fwd(relay_hole_distance.y) down(overlap) pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance);
   }
 }
 
 module pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance) {
+    clip_cylinder_radius = 1;
     standoff_x = pcb_size.x - relay_hole_distance.x+overlap;
     for(x = [1, -1]) {
 	  // standoff 
-	  move([(relay_hole_distance.x / 2 )* x, 0, wall_width - overlap]) 
-	    cuboid([standoff_x,4.5,pcb_height+overlap], anchor=BOTTOM) 
-	    attach(TOP) sphere(r=hole_diameter / 2, anchor=CENTER, $fn=45);
+	  move([(relay_hole_distance.x / 2 )* x, 0]) 
+	    cuboid([standoff_x, 4.5, pcb_height+overlap], anchor=BOTTOM) 
+	    attach(TOP)  sphere(r=hole_diameter/2, anchor=CENTER, $fn=45);
 
 	  //clip
 	  pcb_clip_height=pcb_height+pcb_thickness+overlap+clip_tolerance;
-	  move([(pcb_size.x  / 2 + pcb_clip_size.x/2 )* x, 0, wall_width - overlap])  {
+	  move([(pcb_size.x  / 2 + pcb_clip_size.x/2 )* x, 0])  {
 	    cuboid([pcb_clip_size.x, pcb_clip_size.y, pcb_clip_height], anchor=BOTTOM);
-	    up(pcb_clip_height+tolerance) right(pcb_clip_size.x/6*-x) fwd(pcb_clip_size.y/2) cylinder(h=pcb_clip_size.y, r=1, $fn=45, orient=BACK);
+	    up(pcb_clip_height+tolerance) fwd(pcb_clip_size.y/2) cylinder(h=pcb_clip_size.y, r=clip_cylinder_radius, $fn=45, orient=BACK);
 	  }
     }
 }

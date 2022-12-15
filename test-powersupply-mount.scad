@@ -8,9 +8,9 @@ print_psu = false;;
 wall_width = 3;
 plate_size = [75, 75, 2];
 tolerance = .15;
-overlap = .2;
+overlap = 1;
 
-psu_size = [63.1, 51.3, 28];
+psu_size = [63.1, 51.3, 28.5];
 screw_height = 16;
 screw_distance = 39.25;
 mount_height = 4;
@@ -19,19 +19,19 @@ top_anchor_overhang = 2;
 
 //cuboid(plate_size, anchor=BOTTOM) attach(TOP, overlap=overlap) 5v_psu_mount(psu_size, anchor=BOTTOM);
 
-module 5v_psu_mount(psu_size) {
+module 5v_psu_mount() {
   diff("screwholes") {
     // lengthwise base mounts
     back(psu_size.y / 2 + wall_width / 2 + tolerance) {
-      down(tolerance) cuboid([psu_size.x + tolerance*2, wall_width, mount_height+overlap], anchor=BOTTOM);
+      down(overlap) cuboid([psu_size.x + tolerance*2, wall_width, mount_height+overlap], anchor=BOTTOM);
       right(psu_size.x / 2 - 12) { 
 	// top anchor brackets
-	cuboid([8, wall_width, psu_size.z+overlap*2], anchor=BOTTOM);
-	  up(psu_size.z+overlap+tolerance) fwd((top_anchor_overhang)/2) cuboid([8, wall_width+top_anchor_overhang,  wall_width], anchor=BOTTOM);
+	//cuboid([8, wall_width, psu_size.z+overlap], anchor=BOTTOM);
+	up(psu_size.z+tolerance) fwd((top_anchor_overhang)/2) cuboid([8, wall_width+top_anchor_overhang,  wall_width], anchor=BOTTOM);
       }
     }
     fwd(psu_size.y / 2 + wall_width / 2 + tolerance) {
-      down(tolerance) cuboid([psu_size.x + tolerance*2, wall_width, mount_height+overlap], anchor=BOTTOM);
+      down(overlap) cuboid([psu_size.x + tolerance*2, wall_width, mount_height+overlap], anchor=BOTTOM);
 
       // screw hole mount posts
       right(psu_size.x / 2 - 12) {
@@ -51,7 +51,7 @@ module 5v_psu_mount(psu_size) {
 
     // back base mount
     right(psu_size.x / 2 + wall_width / 2 + tolerance) {
-      down(tolerance) cuboid([wall_width, psu_size.y+wall_width*2+tolerance*2, mount_height+overlap], anchor=BOTTOM)
+      down(overlap) cuboid([wall_width, psu_size.y+wall_width*2+tolerance*2, mount_height+overlap], anchor=BOTTOM)
         if (print_psu) attach([LEFT]) {
 	  color("red") right(psu_size.y/2 + wall_width + .5) back(screw_height - mount_height/2) up(tolerance) cuboid([8,.1,12], anchor=BOTTOM);
 	  color("lightblue") right(psu_size.y/2 + wall_width + .4) back(screw_height - mount_height/2) up(tolerance) cuboid([.1,.1,12+screw_distance], anchor=BOTTOM);

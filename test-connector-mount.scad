@@ -20,7 +20,7 @@ pos_from_edge = 3;
 3_pin_connector_size = [9.95, 5.95, support_height+5];
 4_pin_connector_size = [12.45, 5.95, support_height+5];
 
-base_nema5_15_size=[18.3,16, wall_width+2];
+base_nema5_15_size=[18.3,16, wall_width+4];
 nema_clip_width=4;  //size to edge is 4.235
 
 
@@ -60,7 +60,7 @@ module nema5_15R_female(wall_width) {
   base_nema5_15_size=[18.3,16, nema_depth];
   nema_clip_width=4;  //size to edge is 4.235
   //nema_clip_notch_depth = 3.2;
-  nema_clip_notch_depth = 2.9;
+  nema_clip_notch_depth = 3.0;
   nema_notch_edge_distance = 1;
   clip_height=10;
 
