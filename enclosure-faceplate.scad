@@ -28,9 +28,10 @@ module faceplate(size) {
 }
 
 module backplate_screwholes() {
-  cylinder(h=20, r=post_hole_size, anchor=TOP, $fn=45)
+  cylinder(faceplate_depth, r=post_hole_size, anchor=TOP, $fn=45)
     attach([LEFT+FRONT]) {
-        fwd(enclosure_size.z - 23) down(1) cuboid([5.5,2.1,8]);
+        fwd(faceplate_depth/2 - (wall_width + 9)) down(1) cuboid([5.5,2.1,8]);
+        //fwd(-3.5) down(1) cuboid([5.5,2.1,8]);
     }
 }
 

@@ -12,7 +12,7 @@ arduino_inside = true;
 mounting_tabs = true;
 print_pcb = false;
 print_psu = false;
-print_enclosure = true;
+print_enclosure = false;
 print_faceplate = true;
 
 wall_width = 2;
