@@ -250,36 +250,12 @@ module inside_space(inside_size) {
     }
 }
 
-module clip() {
-  poly_path=([[.5,.5],[.5,0],[0,-.3],[-.5,0],[-.5,.5]]);
-  length=2;
-  attachable(CENTER, 0, FRONT, path=poly_path, l=length) {
-    down(2.5) yrot(90) linear_extrude(height=length, center=true) polygon(poly_path);
-    children();
-  } 
-}
-
 module lcd2_16() {
   cuboid(lcd_size, anchor=BOTTOM) 
     attach(RIGHT,BOTTOM, overlap=.1) {
       back(-2.5)  prismoidal([12,3,4]);
     }
     back(16) left(13) cuboid([40,4,5], anchor=BOTTOM);
-}
-
-module prismoidal(size, anchor=CENTER) {
-    scale=0.5;
-    attachable(anchor, 0, UP, size=size, size2=[size.x, size.y] * scale) {
-        hull() {
-            up(size.z/2-0.005)
-                linear_extrude(height=0.01, center=true)
-                    square([size.x*scale,size.y], center=true);
-            down(size.z/2-0.005)
-                linear_extrude(height=0.01, center=true)
-                    square([size.x,size.y], center=true);
-        }
-        children();
-    }
 }
 
 module pir() {
@@ -300,3 +276,28 @@ module pir() {
         }
   }
 }
+
+module prismoidal(size, anchor=CENTER) {
+    scale=0.5;
+    attachable(anchor, 0, UP, size=size, size2=[size.x, size.y] * scale) {
+        hull() {
+            up(size.z/2-0.005)
+                linear_extrude(height=0.01, center=true)
+                    square([size.x*scale,size.y], center=true);
+            down(size.z/2-0.005)
+                linear_extrude(height=0.01, center=true)
+                    square([size.x,size.y], center=true);
+        }
+        children();
+    }
+}
+
+module clip() {
+  poly_path=([[.5,.5],[.5,0],[0,-.3],[-.5,0],[-.5,.5]]);
+  length=2;
+  attachable(CENTER, 0, FRONT, path=poly_path, l=length) {
+    down(2.5) yrot(90) linear_extrude(height=length, center=true) polygon(poly_path);
+    children();
+  } 
+}
+

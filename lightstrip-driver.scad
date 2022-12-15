@@ -1,44 +1,43 @@
 include <BOSL2/std.scad>;
 include <BOSL2/metric_screws.scad>;
-include <BOSL2/screws.scad>;
 include <powersupply-mount.scad>;
 include <box-connectors.scad>;
 include <pcb-mount.scad>;
+include <my-general-libraries.scad>;
+include <enclosure-faceplate.scad>;
 
-//faceplate stuff
-enclosure_size = [180, 100, 14];
-backplate_depth = 30;
+enclosure_size = [180, 100, 30];
+
 arduino_inside = true;
 mounting_tabs = true;
-overlap = 1;
 print_pcb = false;
 print_psu = false;
-print_enclosure = false;
-print_backplate = true;
+print_enclosure = true;
+print_faceplate = true;
 
 wall_width = 2;
+overlap = 1;
 post_hole_size = 1.8;
 tolerance = .15;
 lip_width = 3;
 lip_height = 3;
-
-connector_pos_from_edge = 13;
-
 // LCD, PIR, LCD+PIR, NONE
 enclosure_stuff = "NONE";
 
-ydistribute(spacing=35) {
+faceplate_component_margin=10.5;
+connector_pos_from_edge = 13;
+
+ydistribute(spacing=120) {
   //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
-  if (print_backplate)  backplate([enclosure_size.x,enclosure_size.y,backplate_depth]); 
-  if (print_enclosure)  lcd2_16_enclosure(enclosure_size);
+  if (print_enclosure)  backplate(enclosure_size); 
+  if (print_faceplate)  faceplate(enclosure_size);
 }
 
 module backplate(size) {
    inner_lip_height = size.z + lip_height - tolerance;
    screwpost_size = 7;
    
-   diff("holes")
-   cuboid([size.x, size.y, wall_width], anchor=TOP) {
+   diff("holes") cuboid([size.x, size.y, wall_width], anchor=BOTTOM) {
       attach([BACK], overlap=1) {
 	//cuboid([8,wall_width,8], anchor=BOTTOM);
 	//mounting holes
@@ -109,7 +108,7 @@ module backplate(size) {
 	} //arduino inside
       }
 
-      attach([TOP]) {
+      attach([BOTTOM]) {
         tag("holes") {
           head_hole_size = 3.1;
           screwhole_xpos = (size.x / 2 - wall_width - 2) - .5;
@@ -124,18 +123,4 @@ module backplate(size) {
       }
   }
 }
-
-module prismoidal(size, anchor=CENTER) {
-    scale=0.5;
-    attachable(anchor, 0, UP, size=size, size2=[size.x, size.y] * scale) {
-        hull() {
-	  up(size.z/2-0.005) linear_extrude(height=0.01, center=true)
-	    square([size.x*scale,size.y], center=true);
-	  down(size.z/2-0.005) linear_extrude(height=0.01, center=true)
-	    square([size.x,size.y], center=true);
-	}
-        children();
-    }
-}
-
 
