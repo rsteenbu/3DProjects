@@ -22,15 +22,18 @@ tolerance = .15;
 lip_width = 3;
 lip_height = 3;
 // LCD, PIR, LCD+PIR, NONE
-enclosure_stuff = "NONE";
+enclosure_stuff = "PIR";
 
 faceplate_component_margin=10.5;
 connector_pos_from_edge = 13;
+faceplate_depth = 12;
 
 ydistribute(spacing=120) {
   //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
+//  translate([0,140]) yrot(180) backplate_screwholes(faceplate_depth - 4);
   if (print_enclosure)  backplate(enclosure_size); 
-  if (print_faceplate)  faceplate(enclosure_size);
+  if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
+//  xrot(180) inside_space([enclosure_size.x-wall_width*2, enclosure_size.y-wall_width*2, faceplate_depth-5]);
 }
 
 module backplate(size) {

@@ -3,41 +3,43 @@ include <BOSL2/metric_screws.scad>;
 
 lcd_size=[72,25,8];
 pir_size=[24.5,33.2,4];
-faceplate_depth = 14;
+face_depth=5;
 
 module faceplate(size) {
   diff("inside")
-  cuboid([size.x, size.y, faceplate_depth], chamfer=5, edges=[BOTTOM], anchor=BOTTOM) {
+  cuboid(size, chamfer=5, edges=[BOTTOM], anchor=BOTTOM) {
     tag("inside") { 
-      attach([BOTTOM], overlap=5) {
-        inside_space([size.x-wall_width*2,size.y-wall_width*2,size.z+5]);
+      attach([BOTTOM], overlap=face_depth) {
+        inside_space([size.x-wall_width*2,size.y-wall_width*2,size.z-face_depth]);
         
         //backplate screwholes
         // [1,1] [1,-1] [-1,-1] [-1,1]
         //  0      90    180    270
         screwhole_xpos = size.x / 2 - wall_width - 2.5;
         screwhole_ypos = size.y / 2 - 5.5;
-        screwhole_zpos = size.z - 5.5;
-        move([screwhole_xpos, screwhole_ypos, -2]) rotate(325) backplate_screwholes();
-        move([screwhole_xpos * -1, screwhole_ypos, -2]) rotate(125) backplate_screwholes();
-        move([screwhole_xpos * -1, screwhole_ypos * -1, -2]) rotate(145) backplate_screwholes();
-        move([screwhole_xpos, screwhole_ypos * -1, -2]) rotate(305) backplate_screwholes();
+	screwhole_zpos = 0;
+        //screwhole_zpos = -(size.z - face_depth) - 12;
+        //screwhole_zpos = size.z - face_depth;
+        move([screwhole_xpos, screwhole_ypos, screwhole_zpos]) rotate(325) backplate_screwholes(size.z-face_depth);
+        move([screwhole_xpos * -1, screwhole_ypos, screwhole_zpos]) rotate(125) backplate_screwholes(size.z-face_depth);
+        move([screwhole_xpos * -1, screwhole_ypos * -1, screwhole_zpos]) rotate(145) backplate_screwholes(size.z-face_depth);
+        move([screwhole_xpos, screwhole_ypos * -1, screwhole_zpos]) rotate(305) backplate_screwholes(size.z-face_depth);
       }
     }
   }
 }
 
-module backplate_screwholes() {
-  cylinder(faceplate_depth, r=post_hole_size, anchor=TOP, $fn=45)
+module backplate_screwholes(faceplate_depth) {
+  cylinder(h=faceplate_depth, r=post_hole_size, anchor=TOP, $fn=45)
     attach([LEFT+FRONT]) {
-        fwd(faceplate_depth/2 - (wall_width + 9)) down(1) cuboid([5.5,2.1,8]);
-        //fwd(-3.5) down(1) cuboid([5.5,2.1,8]);
+         fwd(faceplate_depth/2 - (lip_height+2)) down(1) cuboid([5.5,2.1,8]);
+        //fwd(faceplate_depth/2 - (wall_width + 11.5)) down(1) cuboid([5.5,2.1,8]);
     }
 }
 
 module inside_space(inside_size) {
   diff("screwholes")
-  cuboid(inside_size, anchor=TOP) 
+  cuboid([inside_size.x, inside_size.y, inside_size.z+overlap], anchor=TOP) 
     attach([TOP], overlap=1) {
       if (enclosure_stuff == "LCD" || enclosure_stuff == "LCD+PIR") { 
         lcd_pos = (inside_size.x / 2 - lcd_size.x / 2 - faceplate_component_margin);
@@ -59,20 +61,19 @@ module inside_space(inside_size) {
           // PCB clip
           move([-pir_pos, 17.1, 4]) cuboid([2,1,6]) 
             attach(BACK,FRONT, overlap=.5) clip(); 
-            //attach(FRONT,BACK, overlap=.5) clip(); 
           // PCB nub
           move([-pir_pos, -16.5, 3.5 - pcb_height]) cuboid([3,2,1]);
 	}
       }
 
-      tag("screwholes") {
-	//Screwposts
-	screwhole_xpos = inside_size.x / 2 - 1;
-	screwhole_ypos = inside_size.y / 2 - 3;
-	for(x = [1, -1]) {
-	  for(y = [1, -1]) {
-	    move([screwhole_xpos * x, screwhole_ypos * y, 10]) cylinder(h=inside_size.z-(lip_height + 1), r=5, anchor=TOP, $fn=45);
-	  }
+      //Screwposts
+      screwhole_xpos = inside_size.x / 2 - 1;
+      screwhole_ypos = inside_size.y / 2 - 3;
+      for(x = [1, -1]) {
+	for(y = [1, -1]) {
+	  move([screwhole_xpos * x, screwhole_ypos * y, overlap+tolerance]) 
+	    tag("screwholes") 
+	    cylinder(h=inside_size.z+overlap-lip_height, r=5, anchor=TOP, $fn=45);
 	}
       }
     }
