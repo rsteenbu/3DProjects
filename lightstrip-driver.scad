@@ -26,7 +26,7 @@ enclosure_stuff = "PIR";
 
 faceplate_component_margin=10.5;
 connector_pos_from_edge = 13;
-faceplate_depth = 12;
+faceplate_depth = 14;
 
 ydistribute(spacing=120) {
   //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
