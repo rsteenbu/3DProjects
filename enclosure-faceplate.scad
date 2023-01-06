@@ -1,8 +1,10 @@
 include <BOSL2/std.scad>;
 include <BOSL2/metric_screws.scad>;
 
-lcd_size=[72,25,8];
+2x16_lcd_size=[72,25,8];
+4x20_lcd_size=[97,40,8];
 pir_size=[24.5,33.2,4];
+lip_height=1;
 face_depth=5;
 
 module faceplate(size) {
@@ -42,7 +44,7 @@ module inside_space(inside_size) {
   cuboid([inside_size.x, inside_size.y, inside_size.z+overlap], anchor=TOP) 
     attach([TOP], overlap=1) {
       if (enclosure_stuff == "LCD" || enclosure_stuff == "LCD+PIR") { 
-        lcd_pos = (inside_size.x / 2 - lcd_size.x / 2 - faceplate_component_margin);
+        lcd_pos = (inside_size.x / 2 - 2x16_lcd_size.x / 2 - faceplate_component_margin);
         right(lcd_pos) lcd2_16();
         tag("screwholes") {
           for(x = [1, -1]) {
@@ -73,14 +75,14 @@ module inside_space(inside_size) {
 	for(y = [1, -1]) {
 	  move([screwhole_xpos * x, screwhole_ypos * y, overlap+tolerance]) 
 	    tag("screwholes") 
-	    cylinder(h=inside_size.z+overlap-lip_height, r=5, anchor=TOP, $fn=45);
+	    cylinder(h=inside_size.z-lip_height, r=5, anchor=TOP, $fn=45);
 	}
       }
     }
 }
 
 module lcd2_16() {
-  cuboid(lcd_size, anchor=BOTTOM) 
+  cuboid(2x16_lcd_size, anchor=BOTTOM) 
     attach(RIGHT,BOTTOM, overlap=.1) {
       back(-2.5)  prismoidal([12,3,4]);
     }
