@@ -7,13 +7,14 @@ print_pcb = false;
 
 pcb_thickness = 1.6;
 wall_width = 2;
-plate_size = [40, 70, wall_width];
+plate_size = [60, 80, wall_width];
 tolerance = .15;
-//overlap = .5;
+overlap = 1;
 
 mount_type="clip";  // scre or clip
 pcb_height = 4;
-pcb_clip_size=[1.5,4.5];
+//pcb_clip_size=[1.5,4.5];
+pcb_clip_size=[2.0,4.5];
 
 //arduino PCB stuff
 70x50_pcb_size = [50, 70]; 
@@ -28,16 +29,22 @@ relay_hole_distance=[20,45.26];
 beefcake_relay_pcb_size = [30.5, 62.3];
 beefcake_relay_hole_diameter = 3.25;
 beefcake_relay_hole_distance=[25.50,50.76];
+clip_tolerance = .2;
 
+/*
 // mounting plate
-//cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
+diff("center") {
+cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM) 
+  attach(TOP, overlap=overlap) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+tag("center") down(.5) cuboid([plate_size.x-20, plate_size.y-20, wall_width+1], anchor=BOTTOM);
+}
+*/
 
 //pcb_mount(relay_pcb_size, relay_PCB_HO, "screw");
-//  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 //  cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
 //  pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
 
-module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance=0) {
+module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter) {
   if(print_pcb) 
     color("lightgreen") up (wall_width + pcb_height) cuboid(pcb_size, anchor=BOTTOM);
   back(((relay_hole_distance.y / 2) + tolerance)) { 
@@ -47,7 +54,8 @@ module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance=0
 }
 
 module pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance) {
-    clip_cylinder_radius = 1;
+    //clip_cylinder_radius = 1;
+    clip_cylinder_radius = 1.25;
     standoff_x = pcb_size.x - relay_hole_distance.x+overlap;
     for(x = [1, -1]) {
 	  // standoff 

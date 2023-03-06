@@ -8,15 +8,16 @@ print_psu = false;;
 wall_width = 3;
 tolerance = .25;
 overlap = 1;
-PSU_Type = "MW_RS15_5";
+PSU_Type = "RACM90";
 //PSU_Type = "MW_LRS150_12";
+//PSU_Type = "RACM90";
 
 MW_RS15_psu_size = [63.1, 51.3, 28.5];
 MW_RS15_screw_height = [16, 16];
 MW_RS15_screw_distance = 39.25;
 MW_RS15_screw_distance_from_back = 12;
 
-MW_LRS50_psu_size = [99, 82, 30];
+MW_LRS50_psu_size = [99, 83, 30];
 MW_LRS50_screw_height = [15, 15];
 MW_LRS50_screw_distance = 74;
 MW_LRS50_screw_distance_from_back = 15;
@@ -31,12 +32,26 @@ MW_LRS150_screw_height = [15, 6, 18];
 MW_LRS150_screw_distance = 117;
 MW_LRS150_screw_distance_from_back = 20;
 
+RACM90_psu_size = [110.9, 64, 38.7];
+RACM90_screw_distance = 44.5;
+
 mount_height = 4;
 pcb_thickness = 1.6;
 top_anchor_overhang = 2;
 
-//cuboid(plate_size, anchor=BOTTOM) attach(TOP, overlap=overlap) MW_RS15_psu_mount();
+plate_size=[120, 70, 4];
+//cuboid(plate_size, anchor=BOTTOM) attach(TOP, overlap=overlap) RACM90_psu_mount();
 //cuboid([MW_LRS50_psu_size.x+10, MW_LRS50_psu_size.y+10, 2], anchor=BOTTOM) attach(TOP, overlap=overlap) MW_LRS50_psu_mount();
+
+module RACM90_psu_mount() {
+  for (x = [-1,1]) {
+    translate([RACM90_psu_size.x/2 * x, 0]) cuboid([5, RACM90_psu_size.y, mount_height+overlap], anchor=BOTTOM) {
+      for (y = [0,-1,1]) {
+	attach(TOP, overlap=overlap) translate([0,RACM90_screw_distance/2*y]) screw("M3", length=6, anchor=BOTTOM); 
+      }
+    }
+  }
+}
 
 module MW_RS15_psu_mount() {
   psu_mount(MW_RS15_psu_size, MW_RS15_screw_height, MW_RS15_screw_distance, MW_RS15_screw_distance_from_back);
