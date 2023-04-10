@@ -9,8 +9,6 @@ wall_width = 3;
 tolerance = .25;
 overlap = 1;
 PSU_Type = "RACM90";
-//PSU_Type = "MW_LRS150_12";
-//PSU_Type = "RACM90";
 
 MW_RS15_psu_size = [63.1, 51.3, 28.5];
 MW_RS15_screw_height = [16, 16];
@@ -22,15 +20,22 @@ MW_LRS50_screw_height = [15, 15];
 MW_LRS50_screw_distance = 74;
 MW_LRS50_screw_distance_from_back = 15;
 
+//129, 97, 122.5
 MW_LRS100_psu_size = [129, 97, 30];
 MW_LRS100_screw_height = [15, 6, 18];
 MW_LRS100_screw_distance = 77;
 MW_LRS100_screw_distance_from_back = 20;
 
+//159, 97, 30
 MW_LRS150_psu_size = [159, 97, 30];
 MW_LRS150_screw_height = [15, 6, 18];
 MW_LRS150_screw_distance = 117;
 MW_LRS150_screw_distance_from_back = 20;
+
+MW_LRS200_psu_size = [215, 115, 30];
+MW_LRS200_screw_height = [12.8, 12.5];
+MW_LRS200_screw_distance = 150;
+MW_LRS200_screw_distance_from_back = 32.5;
 
 RACM90_psu_size = [110.9, 64, 38.7];
 RACM90_screw_distance = 44.5;
@@ -69,6 +74,9 @@ module MW_LRS150_psu_mount() {
   psu_mount(MW_LRS150_psu_size, MW_LRS150_screw_height, MW_LRS150_screw_distance, MW_LRS150_screw_distance_from_back);
 }
 
+module MW_LRS200_psu_mount() {
+  psu_mount(MW_LRS200_psu_size, MW_LRS200_screw_height, MW_LRS200_screw_distance, MW_LRS200_screw_distance_from_back);
+}
 
 module psu_mount(psu_size, screw_height, screw_distance, screw_distance_from_back) {
   diff("screwholes") {

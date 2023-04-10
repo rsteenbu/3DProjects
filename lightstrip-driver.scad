@@ -6,13 +6,13 @@ include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
 include <enclosure-faceplate.scad>;
 
-arduino_inside = true;
+arduino_inside = false;
 use_mounting_tabs = true;
 print_pcb = false;
-print_enclosure = false;
-print_faceplate = true;
-// 15w, 50w, 100w, 150w, RACM90
-psu_type = "50w";
+print_enclosure = true;
+print_faceplate = false;
+// 15w, 50w, 100w, 150w, RACM90, 200w
+psu_type = "200w";
 relay_type = "pcb";
 
 wall_width = 2;
@@ -77,6 +77,13 @@ if (psu_type == "100w") {
 }
 if (psu_type == "150w") {
   enclosure_size = [175, 210, 35];
+  ydistribute(spacing=220) {
+    if (print_enclosure)  backplate(enclosure_size); 
+    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
+  }
+}
+if (psu_type == "200w") {
+  enclosure_size = [175, 280, 35];
   ydistribute(spacing=220) {
     if (print_enclosure)  backplate(enclosure_size); 
     if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
@@ -177,24 +184,26 @@ module backplate(size) {
 	  }
 	}
 
-	if (arduino_inside) {
-	  // PCB mounts for arduino
-	  if (psu_type == "RACM90") {
-	    translate([size.x/2 - 15, size.y/2 - 14]) {
-	      translate([-RACM90_psu_size.x/2, -RACM90_psu_size.y/2]) RACM90_psu_mount();
+	// PCB mounts for arduino
+	if (psu_type == "RACM90") {
+	  translate([size.x/2 - 15, size.y/2 - 14]) {
+	    translate([-RACM90_psu_size.x/2, -RACM90_psu_size.y/2]) RACM90_psu_mount();
+	    if (arduino_inside) {
 	      fwd(RACM90_psu_size.y + 10) {
 		translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
 		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 		left(70x50_pcb_size.x + 5)
 		  translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
-		    pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 	      }
 	    }
 	  }
+	}
 
-	  if (psu_type == "15w") {
-	    back(44) translate([-size.x/2+6, -size.y/2+6]) {
-	      translate([+MW_RS15_psu_size.y/2, MW_RS15_psu_size.x/2]) zrot(90) MW_RS15_psu_mount();
+	if (psu_type == "15w") {
+	  back(44) translate([-size.x/2+6, -size.y/2+6]) {
+	    translate([+MW_RS15_psu_size.y/2, MW_RS15_psu_size.x/2]) zrot(90) MW_RS15_psu_mount();
+	    if (arduino_inside) {
 	      right(MW_RS15_psu_size.y + 6)
 		translate([beefcake_relay_pcb_size.x/2, beefcake_relay_pcb_size.y/2]) 
 		pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
@@ -203,11 +212,13 @@ module backplate(size) {
 		zrot(90) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 	    }
 	  }
+	}
 
-	  if (psu_type == "50w") {
-	    if (relay_type == "pcb") {
-	      translate([size.x/2 - 10, size.y/2 - 6]) {
-		translate([-MW_LRS50_psu_size.x/2, -MW_LRS50_psu_size.y/2]) MW_LRS50_psu_mount();
+	if (psu_type == "50w") {
+	  if (relay_type == "pcb") {
+	    translate([size.x/2 - 10, size.y/2 - 6]) {
+	      translate([-MW_LRS50_psu_size.x/2, -MW_LRS50_psu_size.y/2]) MW_LRS50_psu_mount();
+	      if (arduino_inside) {
 		fwd(MW_LRS50_psu_size.y + 10) {
 		  translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
 		    pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
@@ -216,9 +227,11 @@ module backplate(size) {
 		    pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 		}
 	      }
-	    } else { 
-	      translate([size.x/2 - 10, size.y/2 - 6]) {
-		translate([-MW_LRS50_psu_size.x/2, -MW_LRS50_psu_size.y/2]) MW_LRS50_psu_mount();
+	    }
+	  } else { 
+	    translate([size.x/2 - 10, size.y/2 - 6]) {
+	      translate([-MW_LRS50_psu_size.x/2, -MW_LRS50_psu_size.y/2]) MW_LRS50_psu_mount();
+	      if (arduino_inside) {
 		fwd(MW_LRS50_psu_size.y + 10) {
 		  translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
 		    pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
@@ -229,10 +242,12 @@ module backplate(size) {
 	      }
 	    }
 	  }
+	}
 
-	  if (psu_type == "50w-2") {
-	    translate([size.x/2 - 10, size.y/2 - 6]) {
-	      translate([-MW_LRS50_psu_size.x/2, -MW_LRS50_psu_size.y/2]) MW_LRS50_psu_mount();
+	if (psu_type == "50w-2") {
+	  translate([size.x/2 - 10, size.y/2 - 6]) {
+	    translate([-MW_LRS50_psu_size.x/2, -MW_LRS50_psu_size.y/2]) MW_LRS50_psu_mount();
+	      if (arduino_inside) {
 	      fwd(MW_LRS50_psu_size.y + 10) {
 		translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
 		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
@@ -245,12 +260,12 @@ module backplate(size) {
 	      }
 	    }
 	  }
+	}
 
-	  if (psu_type == "100w") {
-	    translate([size.x/2 - 6, -size.y/2 + 15]) {
-	      translate([-MW_LRS100_psu_size.y/2, MW_LRS100_psu_size.x/2]) zrot(270) 
-		MW_LRS100_psu_mount();
-
+	if (psu_type == "100w") {
+	  translate([size.x/2 - 6, -size.y/2 + 15]) {
+	    translate([-MW_LRS100_psu_size.y/2, MW_LRS100_psu_size.x/2]) zrot(270) MW_LRS100_psu_mount();
+	    if (arduino_inside) {
 	      left(MW_LRS100_psu_size.y + 10) {
 		translate([-70x50_pcb_size.x/2, 70x50_pcb_size.y/2]) 
 		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
@@ -266,12 +281,13 @@ module backplate(size) {
 	      }
 	    }
 	  }
+	}
 
-	  if (psu_type == "150w") {
-	    translate([size.x/2 - 6, -size.y/2 + 15]) {
-	      translate([-MW_LRS150_psu_size.y/2, MW_LRS150_psu_size.x/2]) zrot(270) 
-		MW_LRS150_psu_mount();
+	if (psu_type == "150w") {
+	  translate([size.x/2 - 6, -size.y/2 + 15]) {
+	    translate([-MW_LRS150_psu_size.y/2, MW_LRS150_psu_size.x/2]) zrot(270) MW_LRS150_psu_mount();
 
+	    if (arduino_inside) {
 	      left(MW_LRS150_psu_size.y + 10) {
 		translate([-70x50_pcb_size.x/2, 70x50_pcb_size.y/2]) 
 		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
@@ -282,7 +298,13 @@ module backplate(size) {
 	      }
 	    }
 	  }
-	} //arduino inside
+	}
+
+	if (psu_type == "200w") {
+	  translate([size.x/2 - 6, -size.y/2 + 15]) {
+	    translate([-MW_LRS200_psu_size.y/2, MW_LRS200_psu_size.x/2]) zrot(270) MW_LRS200_psu_mount();
+	  }
+	}
       } //attach
 
 	attach([BOTTOM]) {

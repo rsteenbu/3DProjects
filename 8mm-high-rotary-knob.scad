@@ -18,7 +18,7 @@ union() {
     translate([0, 0, -3.5])
     difference() {
         difference() {
-            cylinder(height - 2, centerColumn + 2, centerColumn + 2, true, $fn=45);
+            cylinder(height - 5, centerColumn + 2, centerColumn + 2, true, $fn=45);
             translate([14, 0, 0])
                 cube(20, true);
         };
