@@ -31,6 +31,7 @@ beefcake_relay_hole_diameter = 3.25;
 beefcake_relay_hole_distance=[25.50,50.76];
 clip_tolerance = .2;
 
+
 /*
 // mounting plate
 diff("center") {
@@ -40,9 +41,9 @@ tag("center") down(.5) cuboid([plate_size.x-20, plate_size.y-20, wall_width+1], 
 }
 */
 
-//pcb_mount(relay_pcb_size, relay_PCB_HO, "screw");
-//  cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
-//  pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
+pcb_mount(relay_pcb_size, relay_PCB_HO, "screw");
+  cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM);
+  pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
 
 module pcb_mounts(pcb_size, relay_hole_distance, hole_diameter) {
   if(print_pcb) 

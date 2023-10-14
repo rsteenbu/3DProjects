@@ -6,7 +6,9 @@ CLIP_H = 8;
 HOLE_DIAMETER = 2.9;
 // Distance between the 2 holes
 //PILLAR_PITCH = 62.23;
-PILLAR_PITCH = 45.00;
+//PILLAR_PITCH = 45.00;  // teensy led driver board
+PILLAR_PITCH = 41.30;  // teensy wifi pcb
+
 
 // Height of the mounting bar
 MOUNT_H = 5;
@@ -104,7 +106,7 @@ module din_clip() {
 	union() {
 		translate([-PILLAR_H-MOUNT_H-0.5, PILLAR_2_Y_OFFSET, 0]) {
 			rotate([0, 90, 0]) {
-				cylinder(h= PILLAR_H+MOUNT_H+1, r = HOLE_DIAMETER / 2, $fn = 16);
+				cylinder(h= PILLAR_H+MOUNT_H+5, r = HOLE_DIAMETER / 2, $fn = 16);
 			}
 		}
 		translate([-PILLAR_H-MOUNT_H+2.5, PILLAR_2_Y_OFFSET-bolt_hole.y/2, -(bolt_hole.z-4.4)]) {

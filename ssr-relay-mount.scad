@@ -63,6 +63,7 @@ module relay_mount() {
 	move([(ssr_relay_size.x/2 - relay_mount_size.x/2) * x, 0, 0])  
 	  cuboid(relay_mount_size, anchor=BOTTOM);
       }
+
       cuboid([relay_mount_size.y, relay_mount_size.y, relay_mount_size.z], anchor=BOTTOM)
 	attach(TOP, overlap=overlap) {
 	  screw("M4", l=8+overlap, thread="coarse", tolerance="6g", anchor=BOTTOM);
