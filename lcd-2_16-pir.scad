@@ -33,7 +33,7 @@ support_height = wall_width + 3;
 
 connector_pos_from_edge = 13;
 print_enclosure = true;
-print_backplate = false;
+print_backplate = true;
 
 // LCD, PIR, LCD+PIR
 enclosure_stuff = "LCD+PIR";

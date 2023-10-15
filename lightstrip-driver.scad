@@ -6,13 +6,14 @@ include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
 include <enclosure-faceplate.scad>;
 
-arduino_inside = false;
+arduino_inside = true;
 use_mounting_tabs = true;
+use_outdoor_connectors = true;
 print_pcb = false;
 print_enclosure = true;
 print_faceplate = false;
-// 15w, 50w, 100w, 150w, RACM90, 200w
-psu_type = "200w";
+// 15w, 50w, 100w, 150w, RACM90, 200w, none
+psu_type = "none";
 relay_type = "pcb";
 
 wall_width = 2;
@@ -32,6 +33,13 @@ faceplate_depth = 18;
 
   //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
 //  translate([0,140]) yrot(180) backplate_screwholes(faceplate_depth - 4);
+if (psu_type == "none") {
+  enclosure_size = [100, 100, 30];
+  ydistribute(spacing=220) {
+    if (print_enclosure)  backplate(enclosure_size); 
+    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
+  }
+}
 if (psu_type == "RACM90") {
   enclosure_size = [145, 180, 35];
   ydistribute(spacing=220) {
@@ -109,6 +117,7 @@ module backplate(size) {
       attach([RIGHT], overlap=1) 
 	if (use_mounting_tabs) mounting_tabs(size.x - 40);
 
+      //left wall
       attach([TOP], overlap=overlap) {
 	// outer lip
 	back(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM)
@@ -122,6 +131,7 @@ module backplate(size) {
 	       }
 	     }
 
+	//right wall
 	fwd(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM) {
 	    if (psu_type == "50w" || psu_type == "100w")
 	      attach(BACK, overlap=.5) {
@@ -132,8 +142,9 @@ module backplate(size) {
 	      if ( psu_type == "15w" && arduino_inside ) {
 		tag("holes") { 
 		  translate([size.x/2-25, -2, 0]) nema5_15R_female(wall_width*2);
-		  translate([-5, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
+		  translate([10, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
 		}
+
 
 		letter_extrude=2.7;
 		connector_xpos = -size.x/2 + 25;
@@ -149,11 +160,21 @@ module backplate(size) {
 		translate([connector_xpos-10, -9]) connector(2_pin_connector_size, anchor=FRONT);
 		translate([connector_xpos-10, -12]) yrot(180) linear_extrude(letter_extrude) text("4", size=4, anchor=FRONT);
 	      }
+
+	      if ( psu_type == "none" && arduino_inside ) {
+		tag("holes") { 
+		  translate([27, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
+		  translate([0, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
+	          translate([-27, 0, -2]) cylinder(h=9, r=6, anchor=BOTTOM, $fn=45);
+
+		}
+	      }
 	    }
 	  }
 
-	left(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM) {
 
+	//bottom wall
+	left(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM) {
 	  if (psu_type == "50w" || psu_type == "RACM90")
 	    attach(RIGHT, overlap=2)
 	      tag("holes") {
@@ -163,6 +184,7 @@ module backplate(size) {
 	}
 
  
+	//top wall
 	right(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM) {
 	    if (psu_type == "50w")
 	      attach(LEFT, overlap=.5)
@@ -209,6 +231,15 @@ module backplate(size) {
 		pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
 	      back(MW_RS15_psu_size.x + 10) 
 		translate([70x50_pcb_size.y/2+10, 70x50_pcb_size.x/2]) 
+		zrot(90) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+	    }
+	  }
+	}
+
+	if (psu_type == "none") {
+	  back(0) translate([-size.x/2, -size.y/2]) {
+	    if (arduino_inside) {
+		translate([70x50_pcb_size.y/2+15, 70x50_pcb_size.x/2+40]) 
 		zrot(90) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 	    }
 	  }
