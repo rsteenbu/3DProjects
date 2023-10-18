@@ -1,9 +1,9 @@
 stone_width = 20;
-support_length = stone_width + 90;
+support_length = stone_width + 150;
 
 //the width, actually
 side_length = 5;
-side_height = 20;
+side_height = 30;
 side_width = 10;
 
 base_height=6;
