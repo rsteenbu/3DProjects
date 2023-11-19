@@ -6,15 +6,14 @@ include <BOSL2/screws.scad>;
 print_pcb = false;
 
 pcb_thickness = 1.6;
-wall_width = 2;
-plate_size = [40, 55, wall_width];
+wall_width = 3;
 tolerance = .15;
 overlap = 1;
 
 mount_type="clip";  // scre or clip
 pcb_height = 4;
 //pcb_clip_size=[1.5,4.5];
-pcb_clip_size=[2.0,4.5];
+pcb_clip_size=[2.0,7];
 
 //arduino PCB stuff
 70x50_pcb_size = [50, 70]; 
@@ -37,12 +36,19 @@ lm2596_hole_diameter = 3.25;
 lm2596_hole_distance=[lm2596_pcb_size.x-(2.76*2),lm2596_pcb_size.y-(6.77*2)];
 lm2596_2_mount = true;
 
+// wasatch eight
+wasatch8_pcb_size = [100,100];
+wasatch8_hole_diameter = 3.5;
+wasatch8_hole_distance=[wasatch8_pcb_size.x-(3.5*2),wasatch8_pcb_size.y-(3.5*2)];
+
+plate_size = [120, 120, wall_width];
 
 
 // mounting plate
 //diff("center") {
-cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM) 
-  attach(TOP, overlap=overlap) pcb_mounts(lm2596_pcb_size, lm2596_hole_distance, lm2596_hole_diameter, lm2596_2_mount);
+//cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM) 
+//  attach(TOP, overlap=overlap) pcb_mounts(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
+  //attach(TOP, overlap=overlap) pcb_mounts(lm2596_pcb_size, lm2596_hole_distance, lm2596_hole_diameter, lm2596_2_mount);
   //attach(TOP, overlap=overlap) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 //tag("center") down(.5) cuboid([plate_size.x-20, plate_size.y-20, wall_width+1], anchor=BOTTOM);
 //}
@@ -65,7 +71,7 @@ module pcb_clips(pcb_size, relay_hole_distance, hole_diameter, clip_tolerance, 2
     for(x = [1, -1]) {
       // standoff 
       move([(relay_hole_distance.x / 2 )* x, 0]) 
-	cuboid([standoff_x, 4.5, pcb_height+overlap], anchor=BOTTOM) 
+	cuboid([standoff_x, pcb_clip_size.y, pcb_height+overlap], anchor=BOTTOM) 
 	attach(TOP)  
 	// really convoluded logic here to get diagonal mounts
 	if (!2_mount || ( (x == -1 && !y_mount) || (x == 1 && y_mount) ) ) 

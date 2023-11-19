@@ -11,11 +11,16 @@ enclosure_size = [145, 80, 35];
 //faceplate_height = 18;
 wall_width = 2;
 overlap = 1;
-enclosure_stuff = "LCD+PIR";
 faceplate_component_margin=10.5;
 tolerance = .15;
 screwpost_hole_size = 1.8;
 screwpost_diameter = 5;
+
+// stuff on the enclosure
+lcd_enabled = false;
+pir_enabled = false;
+encoder_enabled = false;
+vents_enabled = true;
 
 
 //faceplate_v2(enclosure_size);
@@ -53,22 +58,24 @@ module faceplate(size) {
     }
     attach([TOP], overlap=overlap) {
 //      right(50) back(20) zrot(90) lcd_4x20();
-      right(45) back(20) zrot(90) lcd_2x16();
-      right(45) fwd(60) xrot(180) pir();
+      if (lcd_enabled) right(45) back(20) zrot(90) lcd_2x16();
+      if (pir_enabled) right(45) fwd(60) xrot(180) pir();
+
       tag("components") {
-        back(15) right(10) cuboid([15, 34, 3])
+        if (encoder_enabled) back(15) right(10) cuboid([15, 34, 3])
 	  attach(BOTTOM, overlap=1)  {
 	    fwd(6) cuboid([2,1,2], anchor=BOTTOM);
 	    cylinder(h=7, r=7.1/2, $fn=45, anchor=BOTTOM);
 	  }
-        fwd(45) left(20) down(4) 
-	for (x=[0,5,10,15,20,25,30,35]) {
-	  left(x) cuboid([1, 50, 6], anchor=BOTTOM);
+	// vents
+	if (vents_enabled) {
+	  //fwd(45) left(20) down(4) 
+	  fwd(0) left(30) down(4) 
+	    for (x=[0:5:35]) {
+//	    for (x=[0,5,10,15,20,25,30,35]) {
+	      left(x) cuboid([2, 50, 6], anchor=BOTTOM);
+	    }
 	}
-        back(65) right(15) down(4) 
-	  for (x=[0,5,10]) {
-	    left(x) cuboid([1, 25, 6], anchor=BOTTOM);
-	  }
       }
     }
   }
