@@ -4,7 +4,6 @@ include <powersupply-mount.scad>;
 include <box-connectors.scad>;
 include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
-//include <enclosure-faceplate.scad>;
 
 arduino_inside = true;
 use_mounting_tabs = true;
@@ -28,10 +27,10 @@ lcd_enabled = false;
 pir_enabled = false;
 encoder_enabled = false;
 vents_enabled = true;
-screwhead_faceplate = false;
+screwhead_faceplate = true;
 
 // faceplate stuff
-face_depth=5;
+face_depth=12;
 screwpost_diameter = 5;
 screwpost_hole_size = 1.8;
 
@@ -39,8 +38,6 @@ faceplate_component_margin=10.5;
 connector_pos_from_edge = 13;
 faceplate_depth = 18;
 
-  //if (print_enclosure) lcd2_16_enclosure([x,55,20]); 
-//  translate([0,140]) yrot(180) backplate_screwholes(faceplate_depth - 4);
 if (enclosure_type == "none") {
   enclosure_size = [100, 100, 30];
   ydistribute(spacing=220) {
@@ -112,7 +109,6 @@ if (enclosure_type == "wasatch") {
     if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
   }
 }
-//  xrot(180) inside_space([enclosure_size.x-wall_width*2, enclosure_size.y-wall_width*2, faceplate_depth-5]);
 
 module mounting_tabs(mounting_hole_distance_apart) {
   for(x = [1, -1]) {
@@ -186,9 +182,7 @@ module backplate(size) {
 	    }
 	    if ( enclosure_type == "wasatch" ) {
 		// power switch
-		//tag("holes") translate([-60, 0, 0]) cuboid([10.5, 7, 28.6]);
-		//tag("holes") translate([-60, -.5, 0]) cuboid([10.5, 7, 28.6]);
-		tag("holes") translate([-60, 0, 0]) cuboid([10.5, 7, 28.6]);
+		tag("holes") translate([-57, 0, 0]) cuboid([10.5, 7, 28.6]);
 	    }
 	  }
 
@@ -204,7 +198,6 @@ module backplate(size) {
 	      // Power cord
 	      tag("holes") { 
 		//ethernet
-		//translate([0, -5.5, 2]) cuboid([16,15,7]); 
 		translate([0, -5, 2]) cuboid([16,14,7]); 
 		//Power
 		translate([-27.5, 0, 2]) {
@@ -245,17 +238,8 @@ module backplate(size) {
 	left(size.x / 2 + wall_width/2 - (wall_width*2 + tolerance)) cuboid([wall_width, size.y - 2*(wall_width+tolerance), inner_lip_height], anchor=BOTTOM);
 	right(size.x / 2 + wall_width/2 - (wall_width*2 + tolerance)) cuboid([wall_width, size.y - 2*(wall_width+tolerance), inner_lip_height], anchor=BOTTOM);
 
-
-	if (! screwhead_faceplate ) {
-	  // Screwposts
-	  screwhole_xpos = size.x / 2 - (wall_width+tolerance) - screwpost_size / 2;
-	  screwhole_ypos = size.y / 2 - (wall_width+tolerance) - screwpost_size / 2;
-	  for(x = [1, -1]) {
-	    for(y = [1, -1]) {
-	      move([screwhole_xpos * x, screwhole_ypos  * y, 0]) cuboid([screwpost_size,screwpost_size,inner_lip_height], anchor=BOTTOM);
-	    }
-	  }
-	}
+	// Screwposts
+        four_screwposts(size, inner_lip_height, screwhead_faceplate, BOTTOM);
 
 	// PCB mounts for arduino
 	if (enclosure_type == "wasatch") {
@@ -396,29 +380,12 @@ module backplate(size) {
 	  }
 	}
       } //attach
-
-	if ( ! screwhead_faceplate ) {
-	  attach([BOTTOM]) {
-	    tag("holes") {
-	      head_hole_size = 3.1;
-	      screwhole_xpos = size.x / 2 - wall_width * 2 - 1;
-	      screwhole_ypos = size.y / 2 - wall_width * 2 - 1;
-	      for(x = [1, -1]) {
-		for(y = [1, -1]) {
-		  translate([screwhole_xpos * x, screwhole_ypos * y, -(inner_lip_height + 3)]) cylinder(h=15, r=post_hole_size, anchor=BOTTOM, $fn=45);
-		  translate([screwhole_xpos * x, screwhole_ypos * y, 1]) cylinder(h=size.z+1, r=head_hole_size, anchor=TOP, $fn=45);
-		}
-	      }
-	    }
-	  }
-      }
   }
 }
 
 
-
 module faceplate(size) {
-  diff("components", "clip") cuboid([size.x, size.y, 4], chamfer=3, edges=[BOTTOM], anchor=BOTTOM) {
+  diff("holes", "clip") cuboid([size.x, size.y, 4], chamfer=3, edges=[BOTTOM], anchor=BOTTOM) {
     attach([TOP], overlap=overlap) {
       for(n = [1, -1]) {
 	translate([0, (size.y/2 - wall_width/2) * n, 0]) cuboid([size.x, wall_width, size.z - face_depth + overlap], anchor=BOTTOM);
@@ -426,25 +393,13 @@ module faceplate(size) {
       }
     }
     attach([TOP], overlap=overlap) {
-      screwhole_xpos = size.x / 2 - wall_width * 2 - 1;
-      screwhole_ypos = size.y / 2 - wall_width * 2 - 1;
-      screwhole_zpos = 0;
-      move([screwhole_xpos,      screwhole_ypos,      screwhole_zpos])
-        rotate(325) backplate_screwholes(size.z-face_depth+overlap);
-      move([screwhole_xpos * -1, screwhole_ypos,      screwhole_zpos])
-        rotate(125) backplate_screwholes(size.z-face_depth+overlap);
-      move([screwhole_xpos * -1, screwhole_ypos * -1, screwhole_zpos])
-        rotate(145) backplate_screwholes(size.z-face_depth+overlap);
-      move([screwhole_xpos,      screwhole_ypos * -1, screwhole_zpos])
-        rotate(305) backplate_screwholes(size.z-face_depth+overlap);
-
+      four_screwposts(size, size.z-face_depth+overlap, !screwhead_faceplate, TOP);
     }
     attach([TOP], overlap=overlap) {
-//      right(50) back(20) zrot(90) lcd_4x20();
       if (lcd_enabled) right(45) back(20) zrot(90) lcd_2x16();
       if (pir_enabled) right(45) fwd(60) xrot(180) pir();
 
-      tag("components") {
+      tag("holes") {
         if (encoder_enabled) back(15) right(10) cuboid([15, 34, 3])
 	  attach(BOTTOM, overlap=1)  {
 	    fwd(6) cuboid([2,1,2], anchor=BOTTOM);
@@ -452,10 +407,8 @@ module faceplate(size) {
 	  }
 	// vents
 	if (vents_enabled) {
-	  //fwd(45) left(20) down(4) 
 	  left(25) down(4) 
 	    for (x=[0:3:45]) {
-//	    for (x=[0,5,10,15,20,25,30,35]) {
 	      left(x) cuboid([1, 50, 6], anchor=BOTTOM);
 	    }
 	}
@@ -476,8 +429,7 @@ module pir() {
   pcb_base_plane_position = pir_inset_depth-5;
 
   down(pir_size.z+opening_size.z) {
-    up(pir_inset_depth) tag("components") cuboid(pir_size, anchor=BOTTOM) {
-//      attach([BACK], overlap=1) cylinder(r=4, h=pir_size.z, spin=[90,0,0], anchor=CENTER);
+    up(pir_inset_depth) tag("holes") cuboid(pir_size, anchor=BOTTOM) {
       attach([TOP], overlap=1)
 	cuboid(opening_size, anchor=BOTTOM) {
 	  // 4 header cavities
@@ -519,18 +471,16 @@ module clip() {
 module lcd_2x16() {
   size=[72,25,8];
   header_size = [40,4,5];
-  tag("components") down(5.0) {
+  tag("holes") down(5.0) {
     cuboid(size, anchor=BOTTOM) 
     attach(RIGHT,BOTTOM, overlap=.1) {
       back(1.5) prismoidal([12,4,4]);
     }
     translate([-(size.x/2 - header_size.x/2 - 3), -(size.y/2 + header_size.y/2 + 1.5), 3]) cuboid(header_size, anchor=BOTTOM);
-    //translate([-13,-16, 3]) cuboid([40,4,5], anchor=BOTTOM);
   }
   fwd(1.4)
   for(x = [1, -1]) {
     for(y = [1, -1]) {
-      //move([37.5 * x, 15.5 * y]) screw("M3", length=6, anchor=BOTTOM); 
       move([(size.x/2 + 1.5) * x, (size.y/2 + 3) * y]) screw("M3", length=6, anchor=BOTTOM); 
     }
   }
@@ -539,26 +489,49 @@ module lcd_2x16() {
 module lcd_4x20() {
   size=[97,40,8];
   header_size = [42,4,5];
-  tag("components") down(5.0) {
+  tag("holes") down(5.0) {
     cuboid(size, anchor=BOTTOM);
     translate([-size.x/2 + header_size.x/2 + 7, -size.y/2 - header_size.y/2 - 6, 3]) cuboid(header_size, anchor=BOTTOM);
   }
   for(x = [1, -1]) {
     for(y = [1, -1]) {
-      //move([(size.x/2 - 2) * x, (size.y/2 + 8) * y]) screw("M3", length=6, anchor=BOTTOM); 
       move([(size.x/2 - 1.75) * x, (size.y/2 + 7.75) * y]) screw("M3", length=6, anchor=BOTTOM); 
     }
   }
 }
 
-module backplate_screwholes(faceplate_inside_depth) {
-  diff("screwholes") {
-    cylinder(h=faceplate_inside_depth-lip_height, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
-
-    tag("screwholes") cylinder(h=faceplate_inside_depth, r=screwpost_hole_size, $fn=45, anchor=BOTTOM)
-      attach([LEFT+FRONT]) {
-	fwd(faceplate_inside_depth/2 - 8) down(1) cuboid([5.5,2.1,9]);
+module four_screwposts(size, inside_depth, nut_hole, anchor) {
+      screwhole_xpos = size.x / 2 - (wall_width+tolerance) - wall_width * 2 - 1;
+      screwhole_ypos = size.y / 2 - (wall_width+tolerance) - wall_width * 2 - 1;
+      screwpost_positions = [ [screwhole_xpos, screwhole_ypos, 0],
+                              [-screwhole_xpos, screwhole_ypos, 90],
+                              [-screwhole_xpos, -screwhole_ypos, 180],
+                              [screwhole_xpos, -screwhole_ypos, 270] ];
+      for (a = [ 0 : len(screwpost_positions) - 1 ]) {
+	point=screwpost_positions[a];
+	translate([point[0],point[1],0]) {
+	  rotate(point[2]) screwposts(inside_depth, nut_hole);
+	  if (!nut_hole) tag("holes") { 
+	      up(5) cylinder(h=10, r=screwpost_hole_size, $fn=45, anchor=anchor);
+	      if (anchor == TOP) 
+	       cylinder(h=inside_depth-3, r=screwpost_hole_size+2, $fn=45, anchor=anchor);
+	      if (anchor == BOTTOM) 
+	       up(-2) cylinder(h=inside_depth-3, r=screwpost_hole_size+2, $fn=45, anchor=anchor);
+	  }
+	}
       }
+}
+
+module screwposts(inside_depth, nut_hole) {
+  diff("screwholes") {
+    cylinder(h=inside_depth-lip_height, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
+
+    tag("screwholes") cylinder(h=inside_depth, r=screwpost_hole_size, $fn=45, anchor=BOTTOM)
+      if ( nut_hole ) {
+      attach([LEFT+FRONT]) {
+	fwd(-inside_depth/2 + 4.9) down(1) cuboid([5.5,2.1,9]);
+      }
+    }
   }
 }
 
