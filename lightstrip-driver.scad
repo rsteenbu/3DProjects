@@ -5,14 +5,18 @@ include <box-connectors.scad>;
 include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
 
+// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch, ssr
+enclosure_type = "ssr";
+// wasatch box orientation.  back is actually left, front is actually right
+// mounting tabs
+// do I need the rest of the drivers??  maybe.
+
 arduino_inside = true;
 use_mounting_tabs = true;
 use_outdoor_connectors = true;
 print_pcb = false;
 print_enclosure = true;
-print_faceplate = true;
-// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch
-enclosure_type = "wasatch";
+print_faceplate = false;
 relay_type = "pcb";
 led_connector = "JST";
 
@@ -22,11 +26,11 @@ post_hole_size = 1.8;
 tolerance = .15;
 lip_width = 3;
 lip_height = 2;
-pcb_height=6.0;
+//pcb_height=6.0;
 lcd_enabled = false;
 pir_enabled = false;
 encoder_enabled = false;
-vents_enabled = true;
+vents_enabled = false;
 screwhead_faceplate = true;
 
 // faceplate stuff
@@ -109,6 +113,13 @@ if (enclosure_type == "wasatch") {
     if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
   }
 }
+if (enclosure_type == "ssr") {
+  enclosure_size = [82, 120, 55];
+  ydistribute(spacing=220) {
+    if (print_enclosure)  backplate(enclosure_size); 
+    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
+  }
+}
 
 module mounting_tabs(mounting_hole_distance_apart) {
   for(x = [1, -1]) {
@@ -123,17 +134,16 @@ module backplate(size) {
    screwpost_size = 7;
    
    diff("holes") cuboid([size.x, size.y, wall_width], anchor=BOTTOM) {
-      attach([FRONT], overlap=1) 
-	if (use_mounting_tabs) mounting_tabs(size.x - 60);
-      attach([BACK], overlap=1) 
-	if (use_mounting_tabs) mounting_tabs(size.x - 60);
+      attach([LEFT], overlap=1) 
+	if (use_mounting_tabs) mounting_tabs(size.y - 60);
+      attach([RIGHT], overlap=1) 
+	if (use_mounting_tabs) mounting_tabs(size.y - 60);
 
-      //left wall
+      //back wall
       attach([TOP], overlap=overlap) {
 	// outer lip
 	back(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM)
-	   if (enclosure_type == "100w" )
-	     attach(FRONT, overlap=4) {
+	   if (enclosure_type == "100w" ) attach(FRONT, overlap=4) {
 	       tag("holes") { 
 		 translate([size.x/2-35, 0, -2]) { 
 		   c14_plug_v2([27,19,9]);
@@ -141,8 +151,7 @@ module backplate(size) {
 		 }
 	       }
 	     }
-
-	//right wall
+	//front wall
 	fwd(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM) {
 	    if (enclosure_type == "50w" || enclosure_type == "100w")
 	      attach(BACK, overlap=.5) {
@@ -184,12 +193,22 @@ module backplate(size) {
 		// power switch
 		tag("holes") translate([-57, 0, 0]) cuboid([10.5, 7, 28.6]);
 	    }
+	    if (enclosure_type == "ssr") attach(BACK, overlap=1)
+	      tag("holes") { 
+		translate([-14, 12, 0]) nema5_15R_female(wall_width*2+1);
+		translate([-14, -16, 0]) nema5_15R_female(wall_width*2+1);
+		translate([19, 0, -2]) zrot(90) c14_plug_v2();
+		//translate([size.x/2-25, 11, -1]) nema5_15R_female(wall_width*2+1);
+		//translate([size.x/2-25, 37, -1]) nema5_15R_female(wall_width*2+1);
+		//translate([-20, size.z/2, -3]) cylinder(h=7, r=7.75, anchor=BOTTOM, $fn=45);
+	      }
+
 	  }
 
-	//back wall
+	//left wall
 	left(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM) {
 	  if (enclosure_type == "50w") attach(RIGHT, overlap=2)
-	      tag("holes") translate([size.y/2-33, 0, -2]) c14_plug_v2([27,19,7]); 
+	      tag("holes") translate([size.y/2-33, 0, -2]) c14_plug_v2(); 
 
 	  if (enclosure_type == "RACM90") attach(RIGHT, overlap=2)
 	      tag("holes") translate([(-size.y/2) + 33 , 0, -2]) c14_plug_v2([27,19,7]); 
@@ -205,9 +224,10 @@ module backplate(size) {
 		  cuboid([12,19,6]); 
 		}
 	      }
+
 	}
  
-	//front wall
+	//right wall
 	right(size.x / 2 - (wall_width + tolerance)/2) cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM) {
 	    if (enclosure_type == "50w") attach(LEFT, overlap=.5)
 		translate([size.y/2 - 23, 6, 0]) connector(3_pin_connector_size, anchor=FRONT);
@@ -242,6 +262,11 @@ module backplate(size) {
         four_screwposts(size, inner_lip_height, screwhead_faceplate, BOTTOM);
 
 	// PCB mounts for arduino
+	if (enclosure_type == "ssr") {
+	    translate([0,30,0]) zrot(90) 70x50_pcb_mount(pcb_height=37);
+	    translate([0,20,0]) zrot(180) ssr_mount();
+	}
+
 	if (enclosure_type == "wasatch") {
 	  pcb_wall_distance=21.5;
 	  translate([-size.x/2, -size.y/2]) {
@@ -524,7 +549,12 @@ module four_screwposts(size, inside_depth, nut_hole, anchor) {
 
 module screwposts(inside_depth, nut_hole) {
   diff("screwholes") {
-    cylinder(h=inside_depth-lip_height, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
+    if (nut_hole) { 
+      up(inside_depth-lip_height-10)
+        cylinder(h=10, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
+    } else {
+        cylinder(h=inside_depth-lip_height, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
+    }
 
     tag("screwholes") cylinder(h=inside_depth, r=screwpost_hole_size, $fn=45, anchor=BOTTOM)
       if ( nut_hole ) {

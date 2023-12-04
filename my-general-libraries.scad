@@ -1,4 +1,7 @@
 include <BOSL2/std.scad>;
+include <BOSL2/threading.scad>;
+include <BOSL2/screws.scad>;
+include <BOSL2/metric_screws.scad>;
 
 /*
 cuboid([10, 60, 2], anchor=BOTTOM);
@@ -8,7 +11,14 @@ diff("hole")
   tag("hole") c14_plug_v2([27,19,7]);
 */
 
-module c14_plug_v2(size) {
+module ssr_nut() {
+  diff("slot")
+    nut("M4", "hex", "normal", 6, thread="coarse", $slop=-0.08, tolerance="6H", anchor=BOTTOM) 
+      tag("slot") attach(TOP, overlap=.4) cuboid([1,7,1]);
+}
+
+
+module c14_plug_v2(size=[27,19,7]) {
   cuboid(size, rounding=3,
       edges=[FRONT+LEFT, FRONT+RIGHT, BACK+LEFT, BACK+RIGHT],
       $fn=24,
