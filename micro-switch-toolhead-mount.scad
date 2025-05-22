@@ -1,15 +1,29 @@
 $fn=50;
 difference() {
-  translate([1,1]) color("green", 0.5) minkowski() {
-    cube([18,18,2.5]);
-    cylinder(1);
-  }
-  translate([6.75,5,-1])    cylinder(h=5, r=1.5/2);
-  translate([4.5,10,-1]) oblongHole(6);
+  translate([1,1]) color("green", 0.5) union() {
+    minkowski() {
+      cube([18,14,2.5]);
+      cylinder(1);
+    }
 
-  translate([13.25,5,-1]) cylinder(h=5, r=1.5/2);
-  translate([15,10,-1])  oblongHole(6);
+    translate([0,12]) union() { 
+      minkowski() {
+	cube([18,2.5,16]);
+	cylinder(1);
+      }
+      translate([0.5,2,10]) %cube([2,5,6]);
+      translate([15.5,2,10]) cube([2,5,6]);
+      translate([0.5,2,14]) cube([17.0,5,2]);
+    }
+
+  }
+
+  translate([4.5,3,-1]) oblongHole(6);
+  translate([15,3,-1])  oblongHole(6);
 }
+
+
+
 
 module oblongHole(len) {
       union() {
