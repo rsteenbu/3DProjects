@@ -7,13 +7,20 @@ difference() {
     }
 
     translate([0,12]) union() { 
-      minkowski() {
-	cube([18,2.5,16]);
-	cylinder(1);
+      difference() {
+	minkowski() {
+	  cube([18,2.5,16]);
+	  cylinder(1);
+	}
+	translate([2.6,-1.5,9.5]) cube([13,5.1,3]);
       }
-      translate([0.5,2,10]) %cube([2,5,6]);
-      translate([15.5,2,10]) cube([2,5,6]);
-      translate([0.5,2,14]) cube([17.0,5,2]);
+      translate([0.6,2,9]) cube([2,5.5,7]);
+      translate([15.4,2,9]) cube([2,5.5,7]);
+      translate([0.6,3,14]) difference() { 
+	cube([16.8,4.5,3]);
+	translate([5,1.5,-.5]) cylinder(r=1.75/2, h=4);
+	translate([5+6.5,1.5,-.5]) cylinder(r=1.75/2, h=4);
+      }
     }
 
   }
