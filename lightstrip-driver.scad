@@ -44,91 +44,35 @@ faceplate_component_margin=10.5;
 connector_pos_from_edge = 13;
 faceplate_depth = 18;
 
-if (enclosure_type == "none") {
-  enclosure_size = [100, 100, 30];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "RACM90") {
-  enclosure_size = [145, 180, 35];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "15w") {
-  enclosure_size = [100, 180, 30];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "50w") {
-  if (relay_type == "pcb") {
-    enclosure_size = [145, 180, 35];
-    ydistribute(spacing=220) {
-      if (print_enclosure)  backplate(enclosure_size); 
-      if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-    }
-  } else {
-    enclosure_size = [145, 180, 35];
-    ydistribute(spacing=220) {
-      if (print_enclosure)  backplate(enclosure_size); 
-      if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-    }
-  }
-}
-if (enclosure_type == "50w-2") {
-  enclosure_size = [160, 180, 35];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "100w") {
-  enclosure_size = [175, 200, 35];
-  ydistribute(spacing=70) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  yrot(0) faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "150w") {
-  enclosure_size = [175, 210, 35];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "200w") {
-  enclosure_size = [175, 280, 35];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "wasatch") {
-  enclosure_size = [150, 150, 35];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
-if (enclosure_type == "ssr") {
-  enclosure_size = [82, 120, 55];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
-}
+// Enclosure type configurations: [type_name, [x, y, z], spacing]
+enclosure_configs = [
+    ["none",          [100, 100, 30],  220],
+    ["RACM90",        [145, 180, 35],  220],
+    ["15w",           [100, 180, 30],  220],
+    ["50w",           [145, 180, 35],  220],
+    ["50w-2",         [160, 180, 35],  220],
+    ["100w",          [175, 200, 35],   70],
+    ["150w",          [175, 210, 35],  220],
+    ["200w",          [175, 280, 35],  220],
+    ["wasatch",       [150, 150, 35],  220],
+    ["ssr",           [82, 120, 55],   220],
+    ["8x-irrigation", [82, 120, 55],   220]
+];
 
-if (enclosure_type == "8x-irrigation") {
-  enclosure_size = [82, 120, 55];
-  ydistribute(spacing=220) {
-    if (print_enclosure)  backplate(enclosure_size); 
-    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-  }
+// Function to get configuration for a given enclosure type
+function get_enclosure_config(type, configs=enclosure_configs) =
+    let(matches = [for(c=configs) if(c[0]==type) c])
+    len(matches) > 0 ? matches[0] : undef;
+
+// Get current configuration
+config = get_enclosure_config(enclosure_type);
+enclosure_size = config[1];
+spacing = config[2];
+
+// Generate enclosure parts
+ydistribute(spacing=spacing) {
+    if (print_enclosure) backplate(enclosure_size);
+    if (print_faceplate) faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
 }
 
 module mounting_tabs(mounting_hole_distance_apart) {
