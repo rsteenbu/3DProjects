@@ -5,7 +5,8 @@ include <box-connectors.scad>;
 include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
 
-// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch, ssr
+// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch, ssr, 8x-irrigation
+//enclosure_type = "8x-irrigation";
 enclosure_type = "ssr";
 // wasatch box orientation.  back is actually left, front is actually right
 // mounting tabs
@@ -14,10 +15,11 @@ enclosure_type = "ssr";
 arduino_inside = true;
 use_mounting_tabs = true;
 use_outdoor_connectors = true;
-print_pcb = false;
 print_enclosure = true;
 print_faceplate = false;
+// relay is either a 50x20 PCB or a beefcake
 relay_type = "pcb";
+// not sure- it moves the connector openings over for JST sizes.
 led_connector = "JST";
 
 wall_width = 2;
@@ -121,6 +123,14 @@ if (enclosure_type == "ssr") {
   }
 }
 
+if (enclosure_type == "8x-irrigation") {
+  enclosure_size = [82, 120, 55];
+  ydistribute(spacing=220) {
+    if (print_enclosure)  backplate(enclosure_size); 
+    if (print_faceplate)  faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
+  }
+}
+
 module mounting_tabs(mounting_hole_distance_apart) {
   for(x = [1, -1]) {
     move([(mounting_hole_distance_apart / 2) * x, 0, -2])
@@ -154,55 +164,56 @@ module backplate(size) {
 	//front wall
 	fwd(size.y / 2 - (wall_width + tolerance)/2) cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM) {
 	    if (enclosure_type == "50w" || enclosure_type == "100w")
-	      attach(BACK, overlap=.5) {
-		translate([size.y/2 - 33, 6, 0]) connector(3_pin_connector_size, anchor=FRONT);
-		translate([size.y/2 - 53, 6, 0]) connector(3_pin_connector_size, anchor=FRONT);
+	    	attach(BACK, overlap=.5) {
+				translate([size.y/2 - 33, 6, 0]) connector(3_pin_connector_size, anchor=FRONT);
+				translate([size.y/2 - 53, 6, 0]) connector(3_pin_connector_size, anchor=FRONT);
 	      }
+
 	    if ( enclosure_type == "15w" && arduino_inside ) {
-	      attach(BACK, overlap=.5) {
-		tag("holes") { 
-		  translate([size.x/2-25, -2, 0]) nema5_15R_female(wall_width*2);
-		  translate([10, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
-		}
+	    	attach(BACK, overlap=.5) {
+				tag("holes") { 
+				  translate([size.x/2-25, -2, 0]) nema5_15R_female(wall_width*2);
+				  translate([10, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
+				}
 
-		letter_extrude=2.7;
-		connector_xpos = -size.x/2 + 25;
-		translate([connector_xpos, 10]) yrot(180) linear_extrude(letter_extrude) text("1", size=4, anchor=FRONT);
-		translate([connector_xpos, 0]) connector(2_pin_connector_size, anchor=FRONT);
+				letter_extrude=2.7;
+				connector_xpos = -size.x/2 + 25;
+				translate([connector_xpos, 10]) yrot(180) linear_extrude(letter_extrude) text("1", size=4, anchor=FRONT);
+				translate([connector_xpos, 0]) connector(2_pin_connector_size, anchor=FRONT);
+	
+				translate([connector_xpos-10, 10]) yrot(180) linear_extrude(letter_extrude) text("2", size=4, anchor=FRONT);
+				translate([connector_xpos-10, 0]) connector(2_pin_connector_size, anchor=FRONT);
 
-		translate([connector_xpos-10, 10]) yrot(180) linear_extrude(letter_extrude) text("2", size=4, anchor=FRONT);
-		translate([connector_xpos-10, 0]) connector(2_pin_connector_size, anchor=FRONT);
+				translate([connector_xpos, -9]) connector(2_pin_connector_size, anchor=FRONT);
+				translate([connector_xpos, -12]) yrot(180) linear_extrude(letter_extrude) text("3", size=4, anchor=FRONT);
 
-		translate([connector_xpos, -9]) connector(2_pin_connector_size, anchor=FRONT);
-		translate([connector_xpos, -12]) yrot(180) linear_extrude(letter_extrude) text("3", size=4, anchor=FRONT);
+				translate([connector_xpos-10, -9]) connector(2_pin_connector_size, anchor=FRONT);
+				translate([connector_xpos-10, -12]) yrot(180) linear_extrude(letter_extrude) text("4", size=4, anchor=FRONT);
+      		}
 
-		translate([connector_xpos-10, -9]) connector(2_pin_connector_size, anchor=FRONT);
-		translate([connector_xpos-10, -12]) yrot(180) linear_extrude(letter_extrude) text("4", size=4, anchor=FRONT);
-	      }
-
-	      if ( enclosure_type == "none" && arduino_inside ) {
-		tag("holes") { 
-		  translate([27, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
-		  translate([0, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
-	          translate([-27, 0, -2]) cylinder(h=9, r=6, anchor=BOTTOM, $fn=45);
-
-		}
-	      }
+		    if ( enclosure_type == "none" && arduino_inside ) {
+				tag("holes") { 
+				  translate([27, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
+				  translate([0, 0, -2]) cylinder(h=5, r=7.75, anchor=BOTTOM, $fn=45);
+			          translate([-27, 0, -2]) cylinder(h=9, r=6, anchor=BOTTOM, $fn=45);
+				}
+	    	}
 	    }
+
 	    if ( enclosure_type == "wasatch" ) {
-		// power switch
-		tag("holes") translate([-57, 0, 0]) cuboid([10.5, 7, 28.6]);
+			// power switch
+			tag("holes") translate([-57, 0, 0]) cuboid([10.5, 7, 28.6]);
 	    }
-	    if (enclosure_type == "ssr") attach(BACK, overlap=1)
-	      tag("holes") { 
-		translate([-14, 12, 0]) nema5_15R_female(wall_width*2+1);
-		translate([-14, -16, 0]) nema5_15R_female(wall_width*2+1);
-		translate([19, 0, -2]) zrot(90) c14_plug_v2();
-		//translate([size.x/2-25, 11, -1]) nema5_15R_female(wall_width*2+1);
-		//translate([size.x/2-25, 37, -1]) nema5_15R_female(wall_width*2+1);
-		//translate([-20, size.z/2, -3]) cylinder(h=7, r=7.75, anchor=BOTTOM, $fn=45);
-	      }
 
+	    if (enclosure_type == "ssr") attach(BACK, overlap=1)
+	    	tag("holes") { 
+				translate([-14, 12, 0]) nema5_15R_female(wall_width*2+1);
+				translate([-14, -16, 0]) nema5_15R_female(wall_width*2+1);
+				translate([19, 0, -2]) zrot(90) c14_plug_v2();
+				//translate([size.x/2-25, 11, -1]) nema5_15R_female(wall_width*2+1);
+				//translate([size.x/2-25, 37, -1]) nema5_15R_female(wall_width*2+1);
+				//translate([-20, size.z/2, -3]) cylinder(h=7, r=7.75, anchor=BOTTOM, $fn=45);
+	    	}
 	  }
 
 	//left wall
@@ -261,47 +272,53 @@ module backplate(size) {
 	// Screwposts
         four_screwposts(size, inner_lip_height, screwhead_faceplate, BOTTOM);
 
+	if (enclosure_type == "8x-irrigation") {
+	    translate([0,30,0]) zrot(90) 70x50_pcb_screw_mount(pcb_height=37);
+	}
+
 	// PCB mounts for arduino
 	if (enclosure_type == "ssr") {
-	    translate([0,30,0]) zrot(90) 70x50_pcb_mount(pcb_height=37);
+	    //translate([-size.x/2 + wall_width*2 + tolerance +4, size.y/2 - wall_width*2 - tolerance, 0]) 
+		// the pcb is rotated so y becomes x
+	    translate([0, ((size.y - wall_width*4)/2 - 70x50_pcb_size.x/2) , 0]) 
+			zrot(90) 
+  			pcb_clip_mount(size, 70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter, pcb_height=37, mount_size=[7,11.1]);
 	    translate([0,20,0]) zrot(180) ssr_mount();
 	}
 
 	if (enclosure_type == "wasatch") {
-	  pcb_wall_distance=21.5;
-	  translate([-size.x/2, -size.y/2]) {
-	    translate([wasatch8_pcb_size.y/2 + pcb_wall_distance, size.x/2]) 
-	      pcb_mounts(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
-	  }
+	  pcb_wall_distance=31.5;
+	  //translate([-size.x/2, -size.y/2]) {
+//	  translate([-(size.x - wasatch8_pcb_size.x)/2,0]) {
+	    zrot(180) 
+	      pcb_clip_mount(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
+//	  }
 	}
 
 	if (enclosure_type == "RACM90") {
 	  translate([size.x/2 - 15, size.y/2 - 14]) {
 	    translate([-RACM90_psu_size.x/2, -RACM90_psu_size.y/2]) RACM90_psu_mount();
-	    if (arduino_inside) {
-	      fwd(RACM90_psu_size.y + 10) {
-		translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
-		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
-		left(70x50_pcb_size.x + 5)
-		  translate([-70x50_pcb_size.x/2, -70x50_pcb_size.y/2]) 
-		  pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
-	      }
-	    }
+	    if (arduino_inside)
+	      fwd(RACM90_psu_size.y + 10)
+			for(x=[0,70x50_pcb_size.x+5])
+			left(x) pcb_clip_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 	  }
 	}
 
 	if (enclosure_type == "15w") {
-	  back(44) translate([-size.x/2+6, -size.y/2+6]) {
-	    translate([+MW_RS15_psu_size.y/2, MW_RS15_psu_size.x/2]) zrot(90) MW_RS15_psu_mount();
+	  //back(44) translate([-size.x/2+6, -size.y/2+6]) {
+	    //translate([+MW_RS15_psu_size.y/2, MW_RS15_psu_size.x/2]) zrot(90) MW_RS15_psu_mount();
+	    translate([-(size.x - MW_RS15_psu_size.x) / 2, 0]) zrot(90) MW_RS15_psu_mount();
 	    if (arduino_inside) {
-	      right(MW_RS15_psu_size.y + 6)
-		translate([beefcake_relay_pcb_size.x/2, beefcake_relay_pcb_size.y/2]) 
-		pcb_mounts(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
-	      back(MW_RS15_psu_size.x + 10) 
-		translate([70x50_pcb_size.y/2+10, 70x50_pcb_size.x/2]) 
-		zrot(90) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+	    	//right(MW_RS15_psu_size.y + 6)
+				//translate([beefcake_relay_pcb_size.x/2, beefcake_relay_pcb_size.y/2]) 
+//			translate([-(size.x - beefcake_relay_pcb_size.x)/2 + wall_width*2 + tolerance, -(size.y - beefcake_relay_pcb_size.y)/2 + wall_width*2 + tolerance]) 
+			translate([-size.x/2 / -size.y/2]) 
+				pcb_clip_mount(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
+	    	back(MW_RS15_psu_size.x + 10) 
+				translate([70x50_pcb_size.y/2+10, 70x50_pcb_size.x/2]) 
+				zrot(90) pcb_clip_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 	    }
-	  }
 	}
 
 	if (enclosure_type == "none") {
