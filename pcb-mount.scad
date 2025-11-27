@@ -43,7 +43,6 @@ wasatch8_hole_distance=[wasatch8_pcb_size.x-(3.5*2),wasatch8_pcb_size.y-(3.5*2)]
 
 plate_size = [120, 120, wall_width];
 
-
 // mounting plate
 //diff("center") {
 //cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM) 
@@ -98,37 +97,38 @@ module 70x50_pcb_screw_mount(pcb_height=7, pcb_mount_width=9) {
   pcb_screw_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 }
 
-module pcb_clip_mount(size, pcb_size, hole_distance, hole_diameter, pcb_height=4, mount_size=[7,8]) {
-   //2_mount: put the mounting sheres onl on two of the mountingg posts
+module pcb_clip_mount(pcb_size, hole_distance, hole_diameter, pcb_height=4, mount_size=[7,8]) {
+   //2_mount: put the mounting sheres only on two of the mounting posts
    //y_mount: if 2_mount put the mounting spheres on the y axis posts
    2_mount=false;
    y_mount=false;
+   echo("hole_distance: ", hole_distance);
+   echo("pcb_size: ", pcb_size);
    pcb_clip_height=pcb_height+pcb_thickness+overlap+clip_tolerance;
-    down(overlap) color("lightblue")  //translate([0,-(pcb_size.y - hole_distance.y)/2])
-     for (y = [0, -1]) {
-       for(x = [0, -1]) {
-         translate([pcb_size.x * x, (hole_distance.y - (pcb_size.y - hole_distance.y)/2) * y]) 
-           zrot(180*x) {
-             if(x==0 && y==0) cuboid([mount_size.x, mount_size.y, pcb_height+overlap], anchor=BOTTOM+RIGHT)
-               attach(TOP)  
-               // really convoluded logic here to get diagonal mounts
-               //if (!2_mount || ( (x == -1 && !y_mount) || (x == 1 && y_mount) ) ) 
-               if (!2_mount || ( y_mount && (x == -1 ) ) )
- 	              sphere(r=hole_diameter/2, anchor=CENTER, $fn=45);
-   	        translate([1, 0]) {
-               cuboid([2, mount_size.y, pcb_clip_height], anchor=BOTTOM);
-               up(pcb_clip_height+tolerance) fwd(mount_size.y/2) 
-                 cylinder(h=mount_size.y, r=clip_cylinder_radius, $fn=45, orient=BACK );
-             } // translate
-         } // zrot
-       } // for x
+   down(overlap) color("lightblue") translate([pcb_size.x/2,(pcb_size.y - hole_distance.y)/2])
+    for (y = [-1, 1]) {
+     for(x = [0, -1]) {
+       translate([pcb_size.x * x, (hole_distance.y/2 * y) - (pcb_size.y - hole_distance.y)/2] ) 
+         zrot(180*x) {
+           cuboid([mount_size.x, mount_size.y, pcb_height+overlap], anchor=BOTTOM+RIGHT)
+             attach(TOP)  
+             // really convoluded logic here to get diagonal mounts
+             if (!2_mount || ( y_mount && (x == -1 ) ) )
+                    sphere(r=hole_diameter/2, anchor=CENTER, $fn=45);
+              translate([1, 0]) {
+             cuboid([2, mount_size.y, pcb_clip_height], anchor=BOTTOM);
+             up(pcb_clip_height+tolerance) fwd(mount_size.y/2) 
+               cylinder(h=mount_size.y, r=clip_cylinder_radius, $fn=45, orient=BACK );
+           } // translate
+       } // zrot
+     } // for x
      } // for y
 
-  if(print_pcb) color("lightgreen", .5) 
+  if(print_pcb) color("lightgreen", .2) 
     //translate([-pcb_size.x/2, 2,  pcb_height])
     //translate([-pcb_size.x/2, -pcb_size.y/2+wall_width,  pcb_height])
-//    translate([size.x/2, size.y/2+wall_width,  pcb_height])
-    cuboid(pcb_size, anchor=BOTTOM);
+    translate([0, 0,  pcb_height])
+    cuboid([pcb_size.x, pcb_size.y, pcb_height], anchor=BOTTOM);
 }
 
 module pcb_screw_mount(pcb_size, relay_hole_distance, hole_diameter, pcb_height=4, pcb_mount_width=7) {
