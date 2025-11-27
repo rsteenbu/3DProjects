@@ -15,42 +15,80 @@ pcb_mount_size=[7,9];
 clip_tolerance = .2;
 clip_cylinder_radius = 1.25;
 
-//70x50 pcb dimensions
-70x50_pcb_size = [50 + clip_tolerance, 70 + clip_tolerance, pcb_thickness]; 
-70x50_hole_diameter = 2;
-70x50_hole_distance=[46,66];
+// PCB Configuration Data Structure
+// Each PCB config is a vector: [width, height, hole_diameter, hole_distance_x, hole_distance_y, use_2_mount]
+// use_2_mount: optional boolean, defaults to false if not specified
 
-//relay PCB dimensions
-relay_pcb_size = [25.5, 51, pcb_thickness];
-relay_hole_diameter = 2;
-relay_hole_distance=[20,45.26];
+PCB_CONFIGS = [
+  // 70x50 PCB
+  ["70x50", [
+    50 + clip_tolerance,  // width
+    70 + clip_tolerance,  // height
+    2,                    // hole_diameter
+    46,                   // hole_distance_x
+    66,                   // hole_distance_y
+    false                 // use_2_mount
+  ]],
 
-//beefcake relay dimensions
-beefcake_relay_pcb_size = [30.5, 62.3, pcb_thickness];
-beefcake_relay_hole_diameter = 3.25;
-beefcake_relay_hole_distance=[25.50,50.76];
+  // Relay PCB
+  ["relay", [
+    25.5,                 // width
+    51,                   // height
+    2,                    // hole_diameter
+    20,                   // hole_distance_x
+    45.26,                // hole_distance_y
+    false                 // use_2_mount
+  ]],
 
-//DC-DC Converter LM2596
-lm2596_pcb_size = [20.8, 43.7, pcb_thickness];
-lm2596_hole_diameter = 3.25;
-lm2596_hole_distance=[lm2596_pcb_size.x-(2.76*2),lm2596_pcb_size.y-(6.77*2)];
-lm2596_2_mount = true;
+  // Beefcake Relay
+  ["beefcake_relay", [
+    30.5,                 // width
+    62.3,                 // height
+    3.25,                 // hole_diameter
+    25.50,                // hole_distance_x
+    50.76,                // hole_distance_y
+    false                 // use_2_mount
+  ]],
 
-// wasatch eight
-wasatch8_pcb_size = [100, 100, pcb_thickness];
-wasatch8_hole_diameter = 3.5;
-wasatch8_hole_distance=[wasatch8_pcb_size.x-(3.5*2),wasatch8_pcb_size.y-(3.5*2)];
+  // DC-DC Converter LM2596
+  ["lm2596", [
+    20.8,                 // width
+    43.7,                 // height
+    3.25,                 // hole_diameter
+    20.8-(2.76*2),        // hole_distance_x
+    43.7-(6.77*2),        // hole_distance_y
+    true                  // use_2_mount
+  ]],
+
+  // Wasatch Eight
+  ["wasatch8", [
+    100,                  // width
+    100,                  // height
+    3.5,                  // hole_diameter
+    100-(3.5*2),          // hole_distance_x
+    100-(3.5*2),          // hole_distance_y
+    false                 // use_2_mount
+  ]]
+];
+
+// Helper functions to extract PCB configuration values
+function pcb_config(name) =
+  let(config = search([name], PCB_CONFIGS)[0])
+  config != [] ? PCB_CONFIGS[config][1] : undef;
+
+function get_pcb_width(name) = pcb_config(name)[0];
+function get_pcb_height(name) = pcb_config(name)[1];
+function get_pcb_hole_diameter(name) = pcb_config(name)[2];
+function get_pcb_hole_distance_x(name) = pcb_config(name)[3];
+function get_pcb_hole_distance_y(name) = pcb_config(name)[4];
+function get_pcb_use_2_mount(name) = pcb_config(name)[5];
+
+function get_pcb_size(name) = [get_pcb_width(name), get_pcb_height(name), pcb_thickness];
+function get_pcb_hole_distance(name) = [get_pcb_hole_distance_x(name), get_pcb_hole_distance_y(name)];
+
+// Legacy variable support (for backward compatibility)
 
 plate_size = [120, 120, wall_width];
-
-// mounting plate
-//diff("center") {
-//cuboid([plate_size.x, plate_size.y, wall_width], anchor=BOTTOM) 
-//  attach(TOP, overlap=overlap) pcb_mounts(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
-  //attach(TOP, overlap=overlap) pcb_mounts(lm2596_pcb_size, lm2596_hole_distance, lm2596_hole_diameter, lm2596_2_mount);
-  //attach(TOP, overlap=overlap) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
-//tag("center") down(.5) cuboid([plate_size.x-20, plate_size.y-20, wall_width+1], anchor=BOTTOM);
-//}
 
 module ssr_mount(relay_mount_size=[2,13.5,9], ssr_relay_size=[45,62,23], overlap=1) {
   notch_size = [7.9,2.5,2.9+overlap];
@@ -97,7 +135,8 @@ module 70x50_pcb_screw_mount(pcb_height=7, pcb_mount_width=9) {
   pcb_screw_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 }
 
-module pcb_clip_mount(pcb_size, hole_distance, hole_diameter, pcb_height=4, mount_size=[7,8]) {
+//module pcb_clip_mount(pcb_size, hole_distance, hole_diameter, pcb_height=4, mount_size=[7,8]) {
+module pcb_clip_mount(pcb_height=4, mount_size=[7,8]) {
    //2_mount: put the mounting sheres only on two of the mounting posts
    //y_mount: if 2_mount put the mounting spheres on the y axis posts
    2_mount=false;

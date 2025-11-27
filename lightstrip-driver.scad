@@ -5,10 +5,10 @@ include <box-connectors.scad>;
 include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
 
-// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch, ssr, 8x-irrigation
+// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch8, ssr, 8x-irrigation
 //enclosure_type = "8x-irrigation";
 //enclosure_type = "ssr";
-enclosure_type = "wasatch";
+enclosure_type = "wasatch8";
 // wasatch box orientation.  back is actually left, front is actually right
 // mounting tabs
 // do I need the rest of the drivers??  maybe.
@@ -45,6 +45,10 @@ faceplate_component_margin=10.5;
 connector_pos_from_edge = 13;
 faceplate_depth = 18;
 
+pcb_size = get_pcb_size(enclosure_type);
+hole_distance = get_pcb_hole_distance("wasatch8");
+hole_diameter = get_pcb_hole_diameter("wasatch8");
+
 // Enclosure type configurations: [type_name, [x, y, z], spacing]
 enclosure_configs = [
     ["none",          [100, 100, 30],  220],
@@ -55,7 +59,7 @@ enclosure_configs = [
     ["100w",          [175, 200, 35],   70],
     ["150w",          [175, 210, 35],  220],
     ["200w",          [175, 280, 35],  220],
-    ["wasatch",       [150, 150, 35],  220],
+    ["wasatch8",      [150, 150, 35],  220],
     ["ssr",           [82, 120, 55],   220],
     ["8x-irrigation", [82, 120, 55],   220]
 ];
@@ -138,7 +142,7 @@ module front_wall_features(size) {
     }
   }
 
-  if (enclosure_type == "wasatch") {
+  if (enclosure_type == "wasatch8") {
     // power switch
     tag("holes") translate([-57, 0, 0]) cuboid([10.5, 7, 28.6]);
   }
@@ -164,7 +168,7 @@ module left_wall_features(size) {
     tag("holes") translate([(-size.y/2) + 33 , 0, -2]) c14_plug_v2([27,19,7]);
   }
 
-  if (enclosure_type == "wasatch") {
+  if (enclosure_type == "wasatch8") {
     attach(RIGHT, overlap=2)
     // Power cord
     tag("holes") {
@@ -185,7 +189,7 @@ module right_wall_features(size) {
     translate([size.y/2 - 23, 6, 0]) connector(3_pin_connector_size, anchor=FRONT);
   }
 
-  if (enclosure_type == "wasatch") {
+  if (enclosure_type == "wasatch8") {
     attach(LEFT, overlap=-1.5) {
       // LED connections
       for(y = [0, 1]) {
@@ -224,9 +228,10 @@ module component_mounts_for_enclosure(size) {
     translate([0,20,0]) zrot(180) ssr_mount();
   }
 
-  if (enclosure_type == "wasatch") {
+  if (enclosure_type == "wasatch8") {
     zrot(180)
-      pcb_clip_mount(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
+      //pcb_clip_mount(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
+      pcb_clip_mount();
   }
 
   if (enclosure_type == "RACM90") {
