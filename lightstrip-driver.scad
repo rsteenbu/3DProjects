@@ -5,21 +5,21 @@ include <box-connectors.scad>;
 include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
 
-// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch8, ssr, 8x-irrigation
-//enclosure_type = "8x-irrigation";
-//enclosure_type = "ssr";
-enclosure_type = "wasatch8";
 // wasatch box orientation.  back is actually left, front is actually right
 // mounting tabs
 // do I need the rest of the drivers??  maybe.
+
+// 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch8, ssr, 8x-irrigation
+enclosure_type = "RACM90";
+
+// relay is either a 50x20 PCB or a beefcake
+relay_type = "pcb";
 
 arduino_inside = true;
 use_mounting_tabs = true;
 use_outdoor_connectors = true;
 print_enclosure = true;
-print_faceplate = false;
-// relay is either a 50x20 PCB or a beefcake
-relay_type = "pcb";
+print_faceplate = true;
 // not sure- it moves the connector openings over for JST sizes.
 led_connector = "JST";
 
@@ -29,7 +29,6 @@ post_hole_size = 1.8;
 tolerance = .15;
 lip_width = 3;
 lip_height = 2;
-//pcb_height=6.0;
 lcd_enabled = false;
 pir_enabled = false;
 encoder_enabled = false;
@@ -44,23 +43,19 @@ screwpost_hole_size = 1.8;
 faceplate_component_margin=10.5;
 connector_pos_from_edge = 13;
 faceplate_depth = 18;
-
-pcb_size = get_pcb_size(enclosure_type);
-hole_distance = get_pcb_hole_distance("wasatch8");
-hole_diameter = get_pcb_hole_diameter("wasatch8");
-
-// Enclosure type configurations: [type_name, [x, y, z], spacing]
+ 
+// Enclosure type configurations: [type_name, [x, y, z], spacing, pcb_type]
 enclosure_configs = [
     ["none",          [100, 100, 30],  220],
-    ["RACM90",        [145, 180, 35],  220],
+    ["RACM90",        [145, 180, 35],  220, "70x50"],
     ["15w",           [100, 180, 30],  220],
     ["50w",           [145, 180, 35],  220],
     ["50w-2",         [160, 180, 35],  220],
     ["100w",          [175, 200, 35],   70],
     ["150w",          [175, 210, 35],  220],
     ["200w",          [175, 280, 35],  220],
-    ["wasatch8",      [150, 150, 35],  220],
-    ["ssr",           [82, 120, 55],   220],
+    ["wasatch8",      [150, 150, 35],  220, "wasatch8"],
+    ["ssr",           [82, 120, 55],   220, "70x50"],
     ["8x-irrigation", [82, 120, 55],   220]
 ];
 
@@ -73,6 +68,10 @@ function get_enclosure_config(type, configs=enclosure_configs) =
 config = get_enclosure_config(enclosure_type);
 enclosure_size = config[1];
 spacing = config[2];
+
+pcb_size = get_pcb_size(config[3]);
+hole_distance = get_pcb_hole_distance(config[3]);
+hole_diameter = get_pcb_hole_diameter(config[3]);
 
 // Generate enclosure parts
 ydistribute(spacing=spacing) {
@@ -222,26 +221,29 @@ module component_mounts_for_enclosure(size) {
   }
 
   if (enclosure_type == "ssr") {
-    translate([0, ((size.y - wall_width*4)/2 - 70x50_pcb_size.x/2) , 0])
+    translate([0, ((size.y - wall_width*4)/2 - pcb_size.x/2) , 0])
       zrot(90)
-      pcb_clip_mount(size, 70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter, pcb_height=37, mount_size=[7,11.1]);
+      //pcb_clip_mount(size, pcb_size, hole_distance, hole_diameter, pcb_height=37, mount_size=[7,11.1]);
+      pcb_clip_mount(pcb_height=37, mount_size=[7,11.1]);
     translate([0,20,0]) zrot(180) ssr_mount();
   }
 
   if (enclosure_type == "wasatch8") {
     zrot(180)
-      //pcb_clip_mount(wasatch8_pcb_size, wasatch8_hole_distance, wasatch8_hole_diameter);
-      pcb_clip_mount();
+      pcb_clip_mount(pcb_height=4, mount_size=[7,8]);
   }
 
   if (enclosure_type == "RACM90") {
     translate([size.x/2 - 15, size.y/2 - 14]) {
       translate([-RACM90_psu_size.x/2, -RACM90_psu_size.y/2]) RACM90_psu_mount();
-      if (arduino_inside)
-        fwd(RACM90_psu_size.y + 10)
-        for(x=[0,70x50_pcb_size.x+5])
-        left(x) pcb_clip_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
     }
+      echo("RACM90 psu size: ", RACM90_psu_size); 
+      if (arduino_inside)
+        //fwd(RACM90_psu_size.y + pcb_size.y/2 + 10)
+	translate([-size.x/2+pcb_size.x/2+20,-size.y/2+pcb_size.y/2+10]) {
+	  for(x=[0,pcb_size.x+5])
+	    right(x) pcb_clip_mount(pcb_height=4, mount_size=[7,8]);
+	}
   }
 
   if (enclosure_type == "15w") {
