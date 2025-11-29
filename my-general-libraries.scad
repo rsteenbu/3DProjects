@@ -1,7 +1,6 @@
 include <BOSL2/std.scad>;
 include <BOSL2/threading.scad>;
 include <BOSL2/screws.scad>;
-include <BOSL2/metric_screws.scad>;
 
 /*
 cuboid([10, 60, 2], anchor=BOTTOM);

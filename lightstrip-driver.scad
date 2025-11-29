@@ -1,5 +1,5 @@
 include <BOSL2/std.scad>;
-include <BOSL2/metric_screws.scad>;
+include <BOSL2/screws.scad>;
 include <powersupply-mount.scad>;
 include <box-connectors.scad>;
 include <pcb-mount.scad>;
@@ -46,9 +46,9 @@ faceplate_depth = 18;
  
 // Enclosure type configurations: [type_name, [x, y, z], spacing, pcb_type]
 enclosure_configs = [
-    ["none",          [100, 100, 30],  220],
+    ["none",          [100, 100, 30],  120, "70x50"],
     ["RACM90",        [145, 180, 35],  220, "70x50"],
-    ["15w",           [100, 180, 30],  220],
+    ["15w",           [100, 180, 30],  220, "70x50"],
     ["50w",           [145, 180, 35],  220],
     ["50w-2",         [160, 180, 35],  220],
     ["100w",          [175, 200, 35],   70],
@@ -146,7 +146,7 @@ module front_wall_features(size) {
     tag("holes") {
       translate([-14, 12, 0]) nema5_15R_female(wall_width*2+1);
       translate([-14, -16, 0]) nema5_15R_female(wall_width*2+1);
-      translate([19, 0, -2]) zrot(90) c14_plug_v2();
+      translate([19, 0, -3]) zrot(90) c14_plug_v2();
     }
   }
 }
@@ -223,7 +223,7 @@ module component_mounts_for_enclosure(size) {
     translate([0, ((size.y - wall_width*4)/2 - pcb_size.x/2) , 0])
       zrot(90)
       //pcb_clip_mount(size, pcb_size, hole_distance, hole_diameter, pcb_height=37, mount_size=[7,11.1]);
-      pcb_clip_mount(pcb_height=37, mount_size=[7,11.1]);
+      pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
     translate([0,20,0]) zrot(180) ssr_mount();
   }
 
@@ -251,16 +251,16 @@ module component_mounts_for_enclosure(size) {
       translate([-size.x/2 / -size.y/2])
         pcb_clip_mount(beefcake_relay_pcb_size, beefcake_relay_hole_distance, beefcake_relay_hole_diameter);
       back(MW_RS15_psu_size.x + 10)
-        translate([70x50_pcb_size.y/2+10, 70x50_pcb_size.x/2])
-        zrot(90) pcb_clip_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+        translate([pcb_size.y/2+10, pcb_size.x/2])
+        zrot(90) pcb_clip_mount(pcb_size, hole_distance, hole_diameter);
     }
   }
 
   if (enclosure_type == "none") {
     back(0) translate([-size.x/2, -size.y/2]) {
       if (arduino_inside) {
-        translate([70x50_pcb_size.y/2+15, 70x50_pcb_size.x/2+40])
-        zrot(90) pcb_mounts(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
+        translate([pcb_size.y/2+15, pcb_size.x/2+40])
+        zrot(90) pcb_screw_mount(pcb_size, hole_distance, hole_diameter);
       }
     }
   }
@@ -380,6 +380,7 @@ module create_inner_lips(size, inner_lip_height) {
 module backplate(size) {
   inner_lip_height = size.z + lip_height - tolerance + overlap;
 
+  echo(size.x, size.y, wall_width);
   diff("holes") cuboid([size.x, size.y, wall_width], anchor=BOTTOM) {
     // Mounting tabs on left and right edges
     attach([LEFT], overlap=1)

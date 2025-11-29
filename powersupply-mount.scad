@@ -1,6 +1,5 @@
 
 include <BOSL2/std.scad>;
-include <BOSL2/metric_screws.scad>;
 include <BOSL2/screws.scad>;
 
 print_psu = false;;

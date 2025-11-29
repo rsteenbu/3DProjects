@@ -1,5 +1,4 @@
 include <BOSL2/std.scad>;
-include <BOSL2/metric_screws.scad>;
 include <BOSL2/screws.scad>;
 
 // ========================================
@@ -182,13 +181,14 @@ module 70x50_pcb_screw_mount(pcb_height=7, pcb_mount_width=9) {
   pcb_screw_mount(70x50_pcb_size, 70x50_hole_distance, 70x50_hole_diameter);
 }
 
-module pcb_clip_mount(pcb_height, mount_size) {
+module pcb_clip_mount(pcb_type, pcb_height=7, mount_size, mount_elevation=0) {
    //2_mount: put the mounting sheres only on two of the mounting posts
    //y_mount: if 2_mount put the mounting spheres on the y axis posts
    2_mount=false;
    y_mount=false;
+   
    pcb_clip_height=pcb_height+pcb_thickness+overlap+clip_tolerance;
-   down(overlap) color("lightblue") translate([pcb_size.x/2,(pcb_size.y - hole_distance.y)/2])
+   down(overlap) color("lightblue") translate([pcb_size.x/2,(pcb_size.y - hole_distance.y)/2, mount_elevation])
     for (y = [-1, 1]) {
      for(x = [0, -1]) {
        translate([pcb_size.x * x, (hole_distance.y/2 * y) - (pcb_size.y - hole_distance.y)/2] ) 
