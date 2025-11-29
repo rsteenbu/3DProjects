@@ -7,7 +7,7 @@ include <BOSL2/screws.scad>;
 // ========================================
 
 // General settings
-print_pcb = true;           // Render PCB visualization
+print_pcb = false;           // Render PCB visualization
 pcb_thickness = 1.6;        // Standard PCB thickness (mm)
 wall_width = 3;             // Base/wall thickness (mm)
 overlap = 1;                // Overlap for boolean operations (mm)

@@ -10,7 +10,7 @@ include <my-general-libraries.scad>;
 // do I need the rest of the drivers??  maybe.
 
 // 15w, 50w, 50w-2, 100w, 150w, RACM90, 200w, none, wasatch8, ssr, 8x-irrigation
-enclosure_type = "RACM90";
+enclosure_type = "ssr";
 
 // relay is either a 50x20 PCB or a beefcake
 relay_type = "pcb";
@@ -23,7 +23,7 @@ print_faceplate = true;
 // not sure- it moves the connector openings over for JST sizes.
 led_connector = "JST";
 
-wall_width = 2;
+wall_width = 3;
 overlap = 1;
 post_hole_size = 1.8;
 tolerance = .15;
@@ -55,7 +55,7 @@ enclosure_configs = [
     ["150w",          [175, 210, 35],  220],
     ["200w",          [175, 280, 35],  220],
     ["wasatch8",      [150, 150, 35],  220, "wasatch8"],
-    ["ssr",           [82, 120, 55],   220, "70x50"],
+    ["ssr",           [82, 120, 55],   100, "70x50"],
     ["8x-irrigation", [82, 120, 55],   220]
 ];
 
@@ -74,7 +74,7 @@ hole_distance = get_pcb_hole_distance(config[3]);
 hole_diameter = get_pcb_hole_diameter(config[3]);
 
 // Generate enclosure parts
-ydistribute(spacing=spacing) {
+xdistribute(spacing=spacing) {
     if (print_enclosure) backplate(enclosure_size);
     if (print_faceplate) faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
 }
@@ -141,11 +141,6 @@ module front_wall_features(size) {
     }
   }
 
-  if (enclosure_type == "wasatch8") {
-    // power switch
-    tag("holes") translate([-57, 0, 0]) cuboid([10.5, 7, 28.6]);
-  }
-
   if (enclosure_type == "ssr") {
     attach(BACK, overlap=1)
     tag("holes") {
@@ -172,9 +167,13 @@ module left_wall_features(size) {
     // Power cord
     tag("holes") {
       //ethernet
-      translate([0, -5, 2]) cuboid([16,14,7]);
+      //translate([0, -5, 2]) cuboid([16,14,7]);
+      translate([10, -5, 2]) cuboid([16,14,7]);
+      //Switch
+      //translate([-37, 0, 2]) cuboid([10.5, 7, 28.6]);
+      translate([-57, 0, 2]) cuboid([10.5, 28.6, 7]);
       //Power
-      translate([-27.5, 0, 2]) {
+      translate([-37.5, 0, 2]) {
         for(y = [1, -1]) translate([0, 12.5*y, -3]) cylinder(r=1.5, h=6, $fn=20);
         cuboid([12,19,6]);
       }
@@ -230,7 +229,7 @@ module component_mounts_for_enclosure(size) {
 
   if (enclosure_type == "wasatch8") {
     zrot(180)
-      pcb_clip_mount(pcb_height=4, mount_size=[7,8]);
+      translate([3.3,-10,0]) pcb_clip_mount(pcb_height=4, mount_size=[7,8]);
   }
 
   if (enclosure_type == "RACM90") {
@@ -364,14 +363,14 @@ module component_mounts_for_enclosure(size) {
 // ============================================================================
 
 module create_inner_lips(size, inner_lip_height) {
-  back(size.y / 2 + wall_width/2 - (wall_width*2 + tolerance))
-    cuboid([size.x - 2*(wall_width + tolerance), wall_width, inner_lip_height], anchor=BOTTOM);
-  fwd (size.y / 2 + wall_width/2 - (wall_width*2 + tolerance))
-    cuboid([size.x - 2*(wall_width + tolerance), wall_width, inner_lip_height], anchor=BOTTOM);
-  left(size.x / 2 + wall_width/2 - (wall_width*2 + tolerance))
-    cuboid([wall_width, size.y - 2*(wall_width+tolerance), inner_lip_height], anchor=BOTTOM);
-  right(size.x / 2 + wall_width/2 - (wall_width*2 + tolerance))
-    cuboid([wall_width, size.y - 2*(wall_width+tolerance), inner_lip_height], anchor=BOTTOM);
+//  back(size.y / 2 + wall_width/2 - (wall_width*2 + tolerance))
+//    cuboid([size.x - 2*(wall_width + tolerance), wall_width, inner_lip_height], anchor=BOTTOM);
+//  fwd (size.y / 2 + wall_width/2 - (wall_width*2 + tolerance))
+//    cuboid([size.x - 2*(wall_width + tolerance), wall_width, inner_lip_height], anchor=BOTTOM);
+//  left(size.x / 2 + wall_width/2 - (wall_width*2 + tolerance))
+//    cuboid([wall_width, size.y - 2*(wall_width+tolerance), inner_lip_height], anchor=BOTTOM);
+//  right(size.x / 2 + wall_width/2 - (wall_width*2 + tolerance))
+//    cuboid([wall_width, size.y - 2*(wall_width+tolerance), inner_lip_height], anchor=BOTTOM);
 }
 
 // ============================================================================
@@ -390,24 +389,32 @@ module backplate(size) {
 
     attach([TOP], overlap=overlap) {
       // Back wall (outer lip)
-      back(size.y / 2 - (wall_width + tolerance)/2)
+      back(size.y / 2 - (wall_width + tolerance)/2) {
         cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM)
           back_wall_features(size);
+        up(size.z+1) cuboid([size.x - 2 , 1, 1+overlap]);
+      }
 
       // Front wall (outer lip)
-      fwd(size.y / 2 - (wall_width + tolerance)/2)
+      fwd(size.y / 2 - (wall_width + tolerance)/2) {
         cuboid([size.x, wall_width+tolerance, size.z+overlap], anchor=BOTTOM)
           front_wall_features(size);
+        up(size.z+1) cuboid([size.x - 2 , 1, 1+overlap]);
+      }
 
       // Left wall
-      left(size.x / 2 - (wall_width + tolerance)/2)
+      left(size.x / 2 - (wall_width + tolerance)/2) {
         cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM)
           left_wall_features(size);
+        up(size.z+1) cuboid([1, size.y - 2, 1+overlap]);
+      }
 
       // Right wall
-      right(size.x / 2 - (wall_width + tolerance)/2)
+      right(size.x / 2 - (wall_width + tolerance)/2) {
         cuboid([wall_width+tolerance, size.y, size.z+overlap], anchor=BOTTOM)
           right_wall_features(size);
+        up(size.z+1) cuboid([1, size.y - 2, 1+overlap]);
+      }
 
       // Inner lip around perimeter
       create_inner_lips(size, inner_lip_height);
@@ -421,13 +428,18 @@ module backplate(size) {
   }
 }
 
-
 module faceplate(size) {
-  diff("holes", "clip") cuboid([size.x, size.y, 4], chamfer=3, edges=[BOTTOM], anchor=BOTTOM) {
+  diff("holes", "faceplate") cuboid([size.x, size.y, 4], chamfer=3, edges=[BOTTOM], anchor=BOTTOM) {
     attach([TOP], overlap=overlap) {
       for(n = [1, -1]) {
-	translate([0, (size.y/2 - wall_width/2) * n, 0]) cuboid([size.x, wall_width, size.z - face_depth + overlap], anchor=BOTTOM);
-	translate([(size.x/2 - wall_width/2) * n, 0, 0]) cuboid([wall_width, size.y, size.z - face_depth + overlap], anchor=BOTTOM);
+	translate([0, (size.y/2 - wall_width/2) * n, 0]) {
+	    cuboid([size.x, wall_width, size.z - face_depth + overlap], anchor=BOTTOM);
+	    up(size.z - face_depth - .5 ) tag("holes") cuboid([size.x - wall_width/2 - tolerance, 1+tolerance*2, 1 + overlap + 1], anchor=BOTTOM);
+	}
+	translate([(size.x/2 - wall_width/2) * n, 0, 0]) {
+	  cuboid([wall_width, size.y, size.z - face_depth + overlap], anchor=BOTTOM);
+	  up(size.z - face_depth - .5 ) tag("holes") cuboid([1+tolerance*2 +.05, size.y - wall_width/2 - .5, 1 + overlap], anchor=BOTTOM);
+	}
       }
     }
     attach([TOP], overlap=overlap) {
@@ -539,8 +551,8 @@ module lcd_4x20() {
 }
 
 module four_screwposts(size, inside_depth, nut_hole, anchor) {
-      screwhole_xpos = size.x / 2 - (wall_width+tolerance) - wall_width * 2 - 1;
-      screwhole_ypos = size.y / 2 - (wall_width+tolerance) - wall_width * 2 - 1;
+      screwhole_xpos = size.x / 2 - (wall_width+tolerance) - wall_width  - 0;
+      screwhole_ypos = size.y / 2 - (wall_width+tolerance) - wall_width  - 0;
       screwpost_positions = [ [screwhole_xpos, screwhole_ypos, 0],
                               [-screwhole_xpos, screwhole_ypos, 90],
                               [-screwhole_xpos, -screwhole_ypos, 180],
@@ -564,7 +576,7 @@ module screwposts(inside_depth, nut_hole) {
   diff("screwholes") {
     if (nut_hole) { 
       up(inside_depth-lip_height-10)
-        cylinder(h=10, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
+        cylinder(h=10+tolerance, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
     } else {
         cylinder(h=inside_depth-lip_height, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
     }
