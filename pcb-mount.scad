@@ -1,6 +1,7 @@
 include <BOSL2/std.scad>;
 include <BOSL2/screws.scad>;
 
+
 // ========================================
 // Global Configuration Parameters
 // ========================================
@@ -11,8 +12,6 @@ pcb_thickness = 1.6;        // Standard PCB thickness (mm)
 wall_width = 3;             // Base/wall thickness (mm)
 overlap = 1;                // Overlap for boolean operations (mm)
 
-// Mount type configuration
-mount_type = "clip";        // Options: "screw" or "clip"
 
 // PCB Mount dimensions (for screw mounts)
 pcb_mount_size = [7, 9];    // [width, depth] of mounting posts
@@ -214,16 +213,21 @@ module pcb_clip_mount(pcb_type, pcb_height=7, mount_size, mount_elevation=0) {
     cuboid([pcb_size.x, pcb_size.y, pcb_thickness], anchor=BOTTOM);
 }
 
-module pcb_screw_mount(pcb_size, relay_hole_distance, hole_diameter, pcb_height=4, pcb_mount_width=7) {
-  if(print_pcb) color("lightgreen") up (wall_width + pcb_height)
+//module pcb_screw_mount(pcb_size, relay_hole_distance, hole_diameter, pcb_height=4, pcb_mount_width=7) {
+module pcb_screw_mount(pcb_height=7, mount_size, mount_elevation=0) {
+  if(print_pcb) color("lightgreen", .2) up (wall_width + pcb_height)
     cuboid(pcb_size, anchor=BOTTOM);
 
-  translate([0, relay_hole_distance.y / 2, 0]) {
-    standoff_x = pcb_size.x - relay_hole_distance.x+overlap;
+  translate([0, hole_distance.y / 2, wall_width + pcb_height - mount_size.z]) {
+    standoff_x = pcb_size.x - hole_distance.x+overlap;
     for(y = [0, -1]) {
       for(x = [1, -1]) {
-        translate([(relay_hole_distance.x / 2 )* x, relay_hole_distance.y * y]) 
-          cuboid([pcb_mount_size.x, pcb_mount_size.y, pcb_height+overlap], anchor=BOTTOM);
+        translate([(hole_distance.x / 2 )* x, hole_distance.y * y]) 
+          diff() 
+	    cuboid([mount_size.x, mount_size.y, mount_size.z], anchor=BOTTOM)
+	      attach(TOP) 
+	        screw_hole("M3", length=6, $fn=100, thread=true, counterbore=0,anchor=TOP);
+
       }
     }
   }

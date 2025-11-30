@@ -14,6 +14,8 @@ enclosure_type = "ssr";
 
 // relay is either a 50x20 PCB or a beefcake
 relay_type = "pcb";
+// Mount type configuration
+pcb_mount_type = "screw";        // Options: "screw" or "clip"
 
 arduino_inside = true;
 use_mounting_tabs = true;
@@ -220,10 +222,15 @@ module component_mounts_for_enclosure(size) {
   }
 
   if (enclosure_type == "ssr") {
+    if (pcb_mount_type == "clip") {
     translate([0, ((size.y - wall_width*4)/2 - pcb_size.x/2) , 0])
       zrot(90)
       //pcb_clip_mount(size, pcb_size, hole_distance, hole_diameter, pcb_height=37, mount_size=[7,11.1]);
       pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
+    } else {
+      translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
+	pcb_screw_mount(pcb_height=30, mount_size=[7,7,10]);
+    }
     translate([0,20,0]) zrot(180) ssr_mount();
   }
 
