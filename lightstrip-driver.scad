@@ -58,7 +58,7 @@ enclosure_configs = [
     ["200w",          [175, 280, 35],  220],
     ["wasatch8",      [150, 150, 35],  220, "wasatch8"],
     ["ssr",           [82, 120, 55],   100, "70x50"],
-    ["8x-irrigation", [82, 120, 55],   220]
+    ["8x-irrigation", [82, 120, 55],   220, "70x50"]
 ];
 
 // Function to get configuration for a given enclosure type
@@ -71,7 +71,10 @@ config = get_enclosure_config(enclosure_type);
 enclosure_size = config[1];
 spacing = config[2];
 
+
 pcb_size = get_pcb_size(config[3]);
+echo("pcb_size: ", pcb_size);
+
 hole_distance = get_pcb_hole_distance(config[3]);
 hole_diameter = get_pcb_hole_diameter(config[3]);
 
@@ -215,17 +218,15 @@ module right_wall_features(size) {
 // ============================================================================
 // COMPONENT MOUNTING - PCB and PSU mounts for different enclosure types
 // ============================================================================
-
 module component_mounts_for_enclosure(size) {
   if (enclosure_type == "8x-irrigation") {
-    translate([0,30,0]) zrot(90) 70x50_pcb_screw_mount(pcb_height=37);
+    translate([0,30,0]) zrot(90) pcb_screw_mount(pcb_height=37, mount_size=[7,7,10]);
   }
 
   if (enclosure_type == "ssr") {
     if (pcb_mount_type == "clip") {
     translate([0, ((size.y - wall_width*4)/2 - pcb_size.x/2) , 0])
       zrot(90)
-      //pcb_clip_mount(size, pcb_size, hole_distance, hole_diameter, pcb_height=37, mount_size=[7,11.1]);
       pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
     } else {
       translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
@@ -387,7 +388,6 @@ module create_inner_lips(size, inner_lip_height) {
 module backplate(size) {
   inner_lip_height = size.z + lip_height - tolerance + overlap;
 
-  echo(size.x, size.y, wall_width);
   diff("holes") cuboid([size.x, size.y, wall_width], anchor=BOTTOM) {
     // Mounting tabs on left and right edges
     attach([LEFT], overlap=1)
