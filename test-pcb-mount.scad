@@ -5,8 +5,9 @@ wall_width = 1;
 overlap = .1;
 
 size = [60, 80, 55];
-pcb_size = get_pcb_size("70x50");
-hole_distance = get_pcb_hole_distance("70x50");
+print_pcb = false;           // Render PCB visualization
 
-cuboid([size.x, size.y, wall_width], anchor=BOTTOM);
-pcb_screw_mount(pcb_height=4.0, hole_diameter=2.5, mount_size=[5,5,4.5]);
+//tcuboid([size.x, size.y, wall_width], anchor=BOTTOM);
+//pcb_screw_mount("70x50", pcb_height=4.0);
+//pcb_clip_mount("70x50", pcb_height=5);
+ssr_mount("EARU-ssr");

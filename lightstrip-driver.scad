@@ -230,7 +230,7 @@ module component_mounts_for_enclosure(size) {
       pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
     } else {
       translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
-	pcb_screw_mount(pcb_height=30, mount_size=[7,7,10]);
+	pcb_screw_mount(pcb_height=30, hole_depth=4, mount_size=[6,6,5]);
     }
     translate([0,20,0]) zrot(180) ssr_mount();
   }
