@@ -90,12 +90,7 @@ module pcb_screw_mount(pcb_height=7, mount_size, mount_elevation=0) {
           diff() 
 	    cuboid(mount_size, anchor=BOTTOM)
 	      attach(TOP) 
-<<<<<<< Updated upstream
-	        screw_hole("M2.5x.35", length=5, $fn=100, thread=false, counterbore=0, anchor=TOP);
-=======
 	        screw_hole("M2.5x.35", length=6, $fn=100, thread=true, counterbore=0, anchor=TOP);
-
->>>>>>> Stashed changes
       }
     }
   }
