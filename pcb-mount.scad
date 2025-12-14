@@ -78,19 +78,21 @@ module pcb_clip_mount(pcb_type, pcb_height=7, mount_size, mount_elevation=0) {
 }
 
 //module pcb_screw_mount(pcb_size, relay_hole_distance, hole_diameter, pcb_height=4, pcb_mount_width=7) {
-module pcb_screw_mount(pcb_height=7, mount_size, mount_elevation=0) {
+module pcb_screw_mount(pcb_height=7, hole_diameter, mount_size) {
   if(print_pcb) color("lightgreen", .2) up (wall_width + pcb_height)
     cuboid(pcb_size, anchor=BOTTOM);
 
+  echo (wall_width,  pcb_height,  mount_size.z);
   translate([0, hole_distance.y / 2, wall_width + pcb_height - mount_size.z]) {
-    standoff_x = pcb_size.x - hole_distance.x+overlap;
+    //standoff_x = pcb_size.x - hole_distance.x+overlap;
     for(y = [0, -1]) {
       for(x = [1, -1]) {
         translate([(hole_distance.x / 2 )* x, hole_distance.y * y]) 
-          diff() 
+          diff("hole") 
 	    cuboid(mount_size, anchor=BOTTOM)
-	      attach(TOP) 
-	        screw_hole("M2.5x.35", length=6, $fn=100, thread=true, counterbore=0, anchor=TOP);
+	      //attach(TOP) screw_hole("M2.5x.35", length=4, $fn=100, thread=true, counterbore=0, anchor=TOP);
+              tag("hole") up(overlap) attach(TOP) cylinder(3,d=hole_diameter, $fn=100,  anchor=TOP);
+
       }
     }
   }
