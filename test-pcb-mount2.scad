@@ -13,7 +13,7 @@ hole_distance = get_pcb_hole_distance("70x50");
 //attach([TOP], overlap=overlap) {
 //    pcb_screw_mount(pcb_height=9.0, mount_size=[5,5,7]);
 for (d = [0:15]) {
-  diameter = 2.2 + d*.02;
+  diameter = 1.8 + d*.02;
   translate([d*7, 0, 0]) {
   diff("hole") 
     cuboid([5,5,6], anchor=BOTTOM)
