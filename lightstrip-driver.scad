@@ -57,7 +57,7 @@ enclosure_configs = [
     ["150w",          [175, 210, 35],  220],
     ["200w",          [175, 280, 35],  220],
     ["wasatch8",      [150, 150, 35],  220, "wasatch8"],
-    ["ssr",           [82, 120, 55],   100, "70x50"],
+    ["ssr",           [57, 95, 40],   100, "70x50"],
     ["8x-irrigation", [82, 120, 55],   220, "70x50"]
 ];
 
@@ -105,6 +105,12 @@ module back_wall_features(size) {
       }
     }
   }
+  if (enclosure_type == "ssr") {
+    attach(BACK, overlap=1)
+    tag("holes") {
+      translate([0, 0, 0]) nema5_15R_female(wall_width*2+1);
+    }
+  }
 }
 
 module front_wall_features(size) {
@@ -149,9 +155,7 @@ module front_wall_features(size) {
   if (enclosure_type == "ssr") {
     attach(BACK, overlap=1)
     tag("holes") {
-      translate([-14, 12, 0]) nema5_15R_female(wall_width*2+1);
-      translate([-14, -16, 0]) nema5_15R_female(wall_width*2+1);
-      translate([19, 0, -3]) zrot(90) c14_plug_v2();
+      translate([0, 0, -3]) zrot(0) c14_plug_v2();
     }
   }
 }
@@ -230,9 +234,9 @@ module component_mounts_for_enclosure(size) {
       pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
     } else {
       translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
-	pcb_screw_mount(pcb_height=30, hole_depth=4, mount_size=[6,6,5]);
+	translate([0,2,0]) pcb_screw_mount("70x50", pcb_height=25.0);
     }
-    translate([0,20,0]) zrot(180) ssr_mount();
+    translate([0,5,0]) zrot(180) ssr_mount("EARU-ssr");
   }
 
   if (enclosure_type == "wasatch8") {
@@ -583,8 +587,8 @@ module four_screwposts(size, inside_depth, nut_hole, anchor) {
 module screwposts(inside_depth, nut_hole) {
   diff("screwholes") {
     if (nut_hole) { 
-      up(inside_depth-lip_height-10)
-        cylinder(h=10+tolerance, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
+      up(inside_depth-lip_height-7)
+        cylinder(h=7+tolerance, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
     } else {
         cylinder(h=inside_depth-lip_height, r=screwpost_diameter, anchor=BOTTOM, $fn=45);
     }

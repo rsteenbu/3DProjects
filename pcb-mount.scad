@@ -129,7 +129,7 @@ module ssr_mount(name) {
           }
        for(x = [1, -1]) {
 	 xpos = hole_distance.x / 2 * x;
-	 translate([xpos, 0]) cuboid([1,8,mount_size.z], anchor=BOTTOM);
+	 translate([xpos, 0]) cuboid([3,10,mount_size.z], anchor=BOTTOM);
        }
     }
   }
