@@ -29,7 +29,7 @@ PCB_CONFIGS = [
   // DC-DC Converter LM2596
   ["lm2596",         [[20.8, 43.7], [15.28, 30.16], [5,5,4.5], 3.25, 5, true]],
   ["wasatch8",       [[100, 100],   [93, 93],       [5,5,4.5], 3.5,  5, false]],
-  ["EARU-ssr",       [[45, 60],     [45, 49],       [10,10,8], 3.3,  7.5, true]]
+  ["EARU-ssr",       [[45, 60, 22],     [45, 49],   [10,10,8], 3.3,  7.5, true]]
 ];
 
 // Helper functions to extract PCB configuration values

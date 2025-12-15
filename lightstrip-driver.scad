@@ -57,7 +57,7 @@ enclosure_configs = [
     ["150w",          [175, 210, 35],  220],
     ["200w",          [175, 280, 35],  220],
     ["wasatch8",      [150, 150, 35],  220, "wasatch8"],
-    ["ssr",           [57, 95, 40],   100, "70x50"],
+    ["ssr",           [57, 95, 50],   100, "70x50"],
     ["8x-irrigation", [82, 120, 55],   220, "70x50"]
 ];
 
@@ -234,7 +234,7 @@ module component_mounts_for_enclosure(size) {
       pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
     } else {
       translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
-	translate([0,2,0]) pcb_screw_mount("70x50", pcb_height=25.0);
+	translate([0,2,0]) pcb_screw_mount("70x50", pcb_height=35);
     }
     translate([0,0,0]) zrot(180) ssr_mount("EARU-ssr");
   }
