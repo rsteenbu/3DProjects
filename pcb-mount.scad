@@ -29,7 +29,7 @@ PCB_CONFIGS = [
   // DC-DC Converter LM2596
   ["lm2596",         [[20.8, 43.7], [15.28, 30.16], [5,5,4.5], 3.25, 5, true]],
   ["wasatch8",       [[100, 100],   [93, 93],       [5,5,4.5], 3.5,  5, false]],
-  ["EARU-ssr",       [[45, 60],     [0, 47],        [10,10,8], 3.3,    7.5, true]]
+  ["EARU-ssr",       [[45, 60],     [45, 49],       [10,10,8], 3.3,  7.5, true]]
 ];
 
 // Helper functions to extract PCB configuration values
@@ -114,15 +114,25 @@ module ssr_mount(name) {
 
   bolt_size=[5.5, 5.5, 2.3];
   slot_size=9;
+  slot_height = .5;
 
-  diff("hole") 
-    cuboid(mount_size, anchor=BOTTOM)
-      tag("hole") { 
-	up(overlap) attach(TOP) cylinder(hole_depth,d=hole_diameter, $fn=cylinder_fn,  anchor=TOP);
-        translate([0,0,1]) cuboid(bolt_size);
-        translate([0,slot_size/2,1]) cuboid([bolt_size.x, slot_size, bolt_size.z]);
-	
-      }
+  for(y = [1, 0]) {
+    ypos = -hole_distance.y / 2 + (hole_distance.y ) * y;
+    echo(ypos);
+    translate([0, ypos]) {
+      diff("hole")
+        zrot(180 * y) cuboid(mount_size, anchor=BOTTOM)
+          tag("hole") { 
+            up(overlap) attach(TOP) cylinder(hole_depth,d=hole_diameter, $fn=cylinder_fn,  anchor=TOP);
+            translate([0,0,slot_height]) cuboid(bolt_size);
+            translate([0,slot_size/2,slot_height]) cuboid([bolt_size.x, slot_size, bolt_size.z]);
+          }
+       for(x = [1, -1]) {
+	 xpos = hole_distance.x / 2 * x;
+	 translate([xpos, 0]) cuboid([1,8,mount_size.z], anchor=BOTTOM);
+       }
+    }
+  }
 
 
 }
