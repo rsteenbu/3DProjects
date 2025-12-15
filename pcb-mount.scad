@@ -29,7 +29,7 @@ PCB_CONFIGS = [
   // DC-DC Converter LM2596
   ["lm2596",         [[20.8, 43.7], [15.28, 30.16], [5,5,4.5], 3.25, 5, true]],
   ["wasatch8",       [[100, 100],   [93, 93],       [5,5,4.5], 3.5,  5, false]],
-  ["EARU-ssr",       [[45, 60],     [0, 47],        [10,10,8], 3.2,    7.5, true]]
+  ["EARU-ssr",       [[45, 60],     [0, 47],        [10,10,8], 3.3,    7.5, true]]
 ];
 
 // Helper functions to extract PCB configuration values
@@ -112,7 +112,7 @@ module ssr_mount(name) {
   hole_diameter = get_pcb_hole_diameter(name);
   mount_size = get_pcb_mount_size(name);
 
-  bolt_size=[5.5, 5.5, 2.1];
+  bolt_size=[5.5, 5.5, 2.3];
   slot_size=9;
 
   diff("hole") 
