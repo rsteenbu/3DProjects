@@ -236,7 +236,7 @@ module component_mounts_for_enclosure(size) {
       translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
 	translate([0,2,0]) pcb_screw_mount("70x50", pcb_height=25.0);
     }
-    translate([0,5,0]) zrot(180) ssr_mount("EARU-ssr");
+    translate([0,0,0]) zrot(180) ssr_mount("EARU-ssr");
   }
 
   if (enclosure_type == "wasatch8") {
