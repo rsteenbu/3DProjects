@@ -1,7 +1,6 @@
 include <BOSL2/std.scad>;
 include <BOSL2/screws.scad>;
 
-
 // ========================================
 // Global Configuration Parameters
 // ========================================
@@ -23,14 +22,22 @@ cylinder_fn = 20;           // $fn value for cylinders (lower quality)
 // Each PCB config is a vector: pcb_size, [hole_distance_x, hole_distance_y], mount_size, hole_diameter, hole_depth use_2_mount]
 // use_2_mount: optional boolean, defaults to false if not specified
 PCB_CONFIGS = [
-  ["70x50",          [[50, 70, 1.6],  [46,66],      [5,5,4.5], 1.94, 5, false]],
-  ["relay",          [[25.5, 51],   [20,45.26],     [5,5,4.5], 2,    5, false]],
-  ["beefcake_relay", [[30.5, 62.3], [25.50, 50.76], [5,5,4.5], 3.25, 5, false]],
-  // DC-DC Converter LM2596
-  ["lm2596",         [[20.8, 43.7], [15.28, 30.16], [5,5,4.5], 3.25, 5, true]],
-  ["wasatch8",       [[100, 100],   [93, 93],       [5,5,4.5], 3.5,  5, false]],
-  ["EARU-ssr",       [[45, 60, 22],     [45, 49],   [10,10,8], 3.3,  7.5, true]]
+//                   pcb_size          [hole_distance] mount_type, hole_diameter, hole_depth use_2_mount]
+  ["70x50",          [[50, 70, 1.6],   [46,66],        "screw",    1.94, 5,   false]],
+  ["relay",          [[25.5, 51],      [20,45.26],     "screw",    2,    5,   false]],
+  ["beefcake_relay", [[30.5, 62.3],    [25.50, 50.76], "screw",    3.25, 5,   false]],
+  ["wasatch8",       [[100, 100, 1.6], [93, 93],       "clip",    3.5,  5,   false]],
+  ["EARU-ssr",       [[45, 60],        [45, 49],       "screw",    3.3,  7.5, true]],
+  ["lm2596",         [[20.8, 43.7],    [15.28, 30.16], [5,5,4.5],  3.25, 5,   true]] // DC-DC Converter LM2596
 ];
+
+mounts = [
+  //["screw",     [5.5,4.5,5] ],
+  ["screw",     [6.5,6.5,5] ],
+  ["clip",      [7,8,4]     ],
+  ["ssr_relay", [10,10,8]   ]
+];
+
 
 // Helper functions to extract PCB configuration values
 function pcb_config(pcb_name) =
@@ -39,12 +46,26 @@ function pcb_config(pcb_name) =
 
 function get_pcb_size(pcb_name)          = pcb_config(pcb_name)[0];
 function get_pcb_hole_distance(pcb_name) = pcb_config(pcb_name)[1];
-function get_pcb_mount_size(pcb_name)    = pcb_config(pcb_name)[2];
+function get_mount_type(pcb_name)        = pcb_config(pcb_name)[2];
 function get_pcb_hole_diameter(pcb_name) = pcb_config(pcb_name)[3];
 function get_pcb_hole_depth(pcb_name)    = pcb_config(pcb_name)[4];
 function get_pcb_2_mount(pcb_name)       = pcb_config(pcb_name)[5];
 
-module pcb_clip_mount(name, pcb_height=7, pcb_height=4) {
+// get mount size for general mounts
+function get_mount_size(name) =
+  let(type_index = search([name], mounts)[0])
+    mounts[type_index][1];
+// get the mount size for the type specefied PCB_CONFIGS
+function get_pcb_mount_size(pcb_name)    = 
+  get_mount_size(get_mount_type(pcb_name));
+
+module pcb_mount(name, pcb_height=7) {
+  pcb_mount_type = get_mount_type(name);
+  if (pcb_mount_type == "clip") pcb_clip_mount(name, pcb_height);
+  if (pcb_mount_type == "screw") pcb_screw_mount(name, pcb_height);
+}
+
+module pcb_clip_mount(name, pcb_height) {
   pcb_size = get_pcb_size(name);
   hole_depth = get_pcb_hole_depth(name);
   hole_distance = get_pcb_hole_distance(name);
@@ -80,7 +101,7 @@ module pcb_clip_mount(name, pcb_height=7, pcb_height=4) {
     translate([0, 0, pcb_height]) cuboid(pcb_size, anchor=BOTTOM);
 }
 
-module pcb_screw_mount(name, pcb_height=7) {
+module pcb_screw_mount(name, pcb_height) {
   pcb_size = get_pcb_size(name);
   hole_depth = get_pcb_hole_depth(name);
   hole_distance = get_pcb_hole_distance(name);
@@ -90,7 +111,6 @@ module pcb_screw_mount(name, pcb_height=7) {
   if(print_pcb) color("lightgreen", .2) up (wall_width + pcb_height)
     cuboid(pcb_size, anchor=BOTTOM);
 
-  echo (wall_width,  pcb_height,  mount_size.z);
   translate([0, hole_distance.y / 2, wall_width + pcb_height - mount_size.z]) {
     //standoff_x = pcb_size.x - hole_distance.x+overlap;
     for(y = [0, -1]) {
@@ -106,11 +126,11 @@ module pcb_screw_mount(name, pcb_height=7) {
 }
 
 module ssr_mount(name) {
-  pcb_size = get_pcb_size(name);
   hole_depth = get_pcb_hole_depth(name);
   hole_distance = get_pcb_hole_distance(name);
   hole_diameter = get_pcb_hole_diameter(name);
-  mount_size = get_pcb_mount_size(name);
+  mount_size = get_mount_size("ssr_relay");
+  echo("mount_size", mount_size);
 
   bolt_size=[5.5, 5.5, 2.3];
   slot_size=9;
@@ -118,7 +138,6 @@ module ssr_mount(name) {
 
   for(y = [1, 0]) {
     ypos = -hole_distance.y / 2 + (hole_distance.y ) * y;
-    echo(ypos);
     translate([0, ypos]) {
       diff("hole")
         zrot(180 * y) cuboid(mount_size, anchor=BOTTOM)
@@ -133,6 +152,4 @@ module ssr_mount(name) {
        }
     }
   }
-
-
 }

@@ -15,7 +15,7 @@ enclosure_type = "ssr";
 // relay is either a 50x20 PCB or a beefcake
 relay_type = "pcb";
 // Mount type configuration
-pcb_mount_type = "screw";        // Options: "screw" or "clip"
+//pcb_mount_type = "screw";        // Options: "screw" or "clip"
 
 arduino_inside = true;
 use_mounting_tabs = true;
@@ -71,10 +71,8 @@ config = get_enclosure_config(enclosure_type);
 enclosure_size = config[1];
 spacing = config[2];
 
-
-pcb_size = get_pcb_size(config[3]);
-echo("pcb_size: ", pcb_size);
-
+pcb_size      = get_pcb_size(config[3]);
+// these are no longer needed
 hole_distance = get_pcb_hole_distance(config[3]);
 hole_diameter = get_pcb_hole_diameter(config[3]);
 
@@ -182,7 +180,7 @@ module left_wall_features(size) {
       //translate([-37, 0, 2]) cuboid([10.5, 7, 28.6]);
       translate([-57, 0, 2]) cuboid([10.5, 28.6, 7]);
       //Power
-      translate([-37.5, 0, 2]) {
+      translate([-37.5, 0, 1]) {
         for(y = [1, -1]) translate([0, 12.5*y, -3]) cylinder(r=1.5, h=6, $fn=20);
         cuboid([12,19,6]);
       }
@@ -228,20 +226,14 @@ module component_mounts_for_enclosure(size) {
   }
 
   if (enclosure_type == "ssr") {
-    if (pcb_mount_type == "clip") {
-    translate([0, ((size.y - wall_width*4)/2 - pcb_size.x/2) , 0])
-      zrot(90)
-      pcb_clip_mount(pcb_height=7, mount_size=[7,11.1], mount_elevation=30);
-    } else {
-      translate([0, ((size.x - wall_width*4)/2 - pcb_size.x/2) , 0])
-	translate([0,2,0]) pcb_screw_mount("70x50", pcb_height=35);
-    }
-    translate([0,0,0]) zrot(180) ssr_mount("EARU-ssr");
+    // solid state relay on the bottom
+    ssr_mount("EARU-ssr");
+    // pcb on the top
+    pcb_mount("70x50", pcb_height=25.0);
   }
 
   if (enclosure_type == "wasatch8") {
-    zrot(180)
-      translate([3.3,-10,0]) pcb_clip_mount(pcb_height=4, mount_size=[7,8]);
+    zrot(180) translate([3.3,-10,0]) pcb_mount("wasatch8", pcb_height=4);
   }
 
   if (enclosure_type == "RACM90") {
@@ -250,7 +242,6 @@ module component_mounts_for_enclosure(size) {
     }
       echo("RACM90 psu size: ", RACM90_psu_size); 
       if (arduino_inside)
-        //fwd(RACM90_psu_size.y + pcb_size.y/2 + 10)
 	translate([-size.x/2+pcb_size.x/2+20,-size.y/2+pcb_size.y/2+10]) {
 	  for(x=[0,pcb_size.x+5])
 	    right(x) pcb_clip_mount(pcb_height=4, mount_size=[7,8]);
