@@ -9,10 +9,7 @@ include <BOSL2/screws.scad>;
 print_pcb = false;           // Render PCB visualization
 
 // Clip mount configuration
-clip_tolerance = 0.1;       // Clearance for PCB in clip mounts (mm)
-clip_cylinder_radius = 1.25; // Radius of clip retaining cylinder (mm)
-clip_wall_thickness = 2;    // Thickness of clip walls (mm)
-clip_standoff_from_edge = 1; // Distance from clip edge to PCB (mm)
+tolerance = 0.1;       // Clearance for PCB in clip mounts (mm)
 
 // Rendering quality
 sphere_fn = 45;             // $fn value for spheres
@@ -26,15 +23,14 @@ PCB_CONFIGS = [
   ["70x50",          [[50, 70, 1.6],   [46,66],        "screw",    1.94, 5,   false]],
   ["relay",          [[25.5, 51],      [20,45.26],     "screw",    2,    5,   false]],
   ["beefcake_relay", [[30.5, 62.3],    [25.50, 50.76], "screw",    3.25, 5,   false]],
-  ["wasatch8",       [[100, 100, 1.6], [93, 93],       "clip",    3.5,  5,   false]],
+  ["wasatch8",       [[100, 100, 1.6], [93, 93],       "screw",    3.5,  5,   false]],
   ["EARU-ssr",       [[45, 60],        [45, 49],       "screw",    3.3,  7.5, true]],
-  ["lm2596",         [[20.8, 43.7],    [15.28, 30.16], [5,5,4.5],  3.25, 5,   true]] // DC-DC Converter LM2596
+  ["lm2596",         [[20.8, 43.7],    [15.28, 30.16], "screw", ,  3.25, 5,   true]] // DC-DC Converter LM2596
 ];
 
 mounts = [
-  //["screw",     [5.5,4.5,5] ],
-  ["screw",     [6.5,6.5,5] ],
-  ["clip",      [7,8,4]     ],
+  ["screw",     [6.5,6.5,6.5] ],
+  ["clip",      [8,8,4]     ],
   ["ssr_relay", [10,10,8]   ]
 ];
 
@@ -61,47 +57,6 @@ function get_pcb_mount_size(pcb_name)    =
 
 module pcb_mount(name, pcb_height=7) {
   pcb_mount_type = get_mount_type(name);
-  if (pcb_mount_type == "clip") pcb_clip_mount(name, pcb_height);
-  if (pcb_mount_type == "screw") pcb_screw_mount(name, pcb_height);
-}
-
-module pcb_clip_mount(name, pcb_height) {
-  pcb_size = get_pcb_size(name);
-  hole_depth = get_pcb_hole_depth(name);
-  hole_distance = get_pcb_hole_distance(name);
-  hole_diameter = get_pcb_hole_diameter(name);
-  mount_size = get_pcb_mount_size(name);
-  2_mount = get_pcb_2_mount(name);
-  //y_mount: if 2_mount put the mounting spheres on the y axis posts
-  y_mount=false;
-  width=pcb_size.x+clip_tolerance;
-  length=pcb_size.y+clip_tolerance;
-  
-  pcb_clip_height = pcb_height + pcb_size.z + overlap + clip_tolerance;
-  down(0) color("lightblue") translate([width/2, (length - hole_distance.y)/2, pcb_height - mount_size.z])
-    for (y = [-1, 1]) {
-      for(x = [0, -1]) {
-        translate([width * x, (hole_distance.y/2 * y) - (length - hole_distance.y)/2] ) 
-          zrot(180*x) {
-            cuboid([mount_size.x, mount_size.y, mount_size.z], anchor=BOTTOM+RIGHT)
-              attach(TOP)
-              // really convoluded logic here to get diagonal mounts
-                if (!2_mount || ( y_mount && (x == -1 ) ) )
-                  sphere(r=hole_diameter/2, anchor=CENTER, $fn=sphere_fn);
-                translate([clip_standoff_from_edge, 0]) {
-                  cuboid([clip_wall_thickness, mount_size.y, pcb_clip_height], anchor=BOTTOM);
-                  up(pcb_clip_height+clip_tolerance) fwd(mount_size.y/2)
-                    cylinder(h=mount_size.y, r=clip_cylinder_radius, $fn=sphere_fn, orient=BACK );
-                } // translate
-          } // zrot
-      } // for x
-    } // for y
-
-  if(print_pcb) color("lightgreen", .5) 
-    translate([0, 0, pcb_height]) cuboid(pcb_size, anchor=BOTTOM);
-}
-
-module pcb_screw_mount(name, pcb_height) {
   pcb_size = get_pcb_size(name);
   hole_depth = get_pcb_hole_depth(name);
   hole_distance = get_pcb_hole_distance(name);
@@ -111,17 +66,38 @@ module pcb_screw_mount(name, pcb_height) {
   if(print_pcb) color("lightgreen", .2) up (wall_width + pcb_height)
     cuboid(pcb_size, anchor=BOTTOM);
 
-  translate([0, hole_distance.y / 2, wall_width + pcb_height - mount_size.z]) {
-    //standoff_x = pcb_size.x - hole_distance.x+overlap;
+  color("lightblue") translate([0, hole_distance.y / 2, wall_width + pcb_height - mount_size.z]) {
     for(y = [0, -1]) {
       for(x = [1, -1]) {
-        translate([(hole_distance.x / 2 )* x, hole_distance.y * y]) 
-          diff("hole") 
-	    cuboid(mount_size, anchor=BOTTOM)
-              tag("hole") up(overlap) attach(TOP) cylinder(hole_depth,d=hole_diameter, $fn=cylinder_fn,  anchor=TOP);
+        translate([(hole_distance.x / 2 )* x, hole_distance.y * y]) {
+	    diff("hole") cuboid(mount_size, anchor=BOTTOM) 
+              if (pcb_mount_type == "screw") {
+	        screw_mount_feature(hole_depth, hole_diameter);
+	      }
+              if (pcb_mount_type == "clip") {
+	        clip_mount_feature(mount_size, pcb_size, hole_distance, hole_diameter, x);
+	      } // if (pcb_mount_type == "clip")
+	} // mount translate
+      } // for x
+    } // for y
+  }
+}
 
-      }
-    }
+module screw_mount_feature(hole_depth, hole_diameter) {
+  attach(TOP) tag("hole") up(overlap) cylinder(hole_depth,d=hole_diameter, $fn=cylinder_fn,  anchor=TOP);
+}
+
+module clip_mount_feature(mount_size, pcb_size, hole_distance, hole_diameter, x) {
+  clip_cylinder_radius = 1.25; // Radius of clip retaining cylinder (mm)
+  clip_wall_thickness = 2;    // Thickness of clip walls (mm)
+  clip_standoff_from_edge = 1; // Distance from clip edge to PCB (mm)
+
+  pcb_clip_height = mount_size.z + pcb_size.z + tolerance;
+  up(mount_size.z-tolerance) sphere(r=hole_diameter/2, anchor=CENTER, $fn=sphere_fn);
+  translate([(clip_wall_thickness/2 + (pcb_size.y - hole_distance.y)/2 + tolerance) * x, 0]) {
+    cuboid([clip_wall_thickness, mount_size.y, pcb_clip_height], anchor=BOTTOM);
+    up(pcb_clip_height+tolerance) fwd(mount_size.y/2)
+      cylinder(h=mount_size.y, r=clip_cylinder_radius, $fn=sphere_fn, orient=BACK );
   }
 }
 
@@ -130,7 +106,6 @@ module ssr_mount(name) {
   hole_distance = get_pcb_hole_distance(name);
   hole_diameter = get_pcb_hole_diameter(name);
   mount_size = get_mount_size("ssr_relay");
-  echo("mount_size", mount_size);
 
   bolt_size=[5.5, 5.5, 2.3];
   slot_size=9;
