@@ -7,9 +7,6 @@ include <my-general-libraries.scad>;
 
 use_mounting_tabs = true;
 use_outdoor_connectors = true;
-print_enclosure = true;
-print_faceplate = true;
-print_faceplate_seal = true;
 // not sure- it moves the connector openings over for JST sizes.
 led_connector = "JST";
 
@@ -74,17 +71,20 @@ spacing = enclosure_size.x + 20;
 
 //pcb_size      = get_pcb_size(config[3]);
 
+print_enclosure = false;
+print_faceplate = true;
+print_faceplate_seal = true;
+
 // Generate enclosure parts
 xdistribute(spacing=spacing) {
     if (print_enclosure) backplate(enclosure_size);
-    zdistribute(spacing = 8.5) {
-      if (print_faceplate) faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
-      if (print_faceplate_seal) color("grey") faceplate_seal([enclosure_size.x, enclosure_size.y]);
-    }
+    if (print_faceplate) faceplate([enclosure_size.x, enclosure_size.y, faceplate_depth]);
+// need to change the logic so they are close together no matter what's being printed
+    if (print_faceplate_seal) color("grey") faceplate_seal([enclosure_size.x, enclosure_size.y]);
 }
 
 module faceplate_seal(size) {
-  seal_height = .6;
+  seal_height = 1;
   for(n = [1, -1]) {
     // y lips
     translate([0, (size.y/2 - wall_width/2) * n, 0])
@@ -347,19 +347,20 @@ module faceplate(size) {
       for(n = [1, -1]) {
 	translate([0, (size.y/2 - wall_width/2) * n, 0]) {
 	    cuboid([size.x, wall_width, size.z - face_depth + overlap], anchor=BOTTOM);
-	    up(size.z - face_depth - .5 ) tag("holes") 
-              // sealing lip
+            // sealing lip
+	    up(size.z - face_depth - 1 ) tag("holes") 
 	      cuboid([size.x - wall_width/2 - tolerance, 
 	              1 + tolerance * 2, 
-		      1 + overlap + 1], 
+		      1 + overlap + .9], 
 		     anchor=BOTTOM);
 	}
 	translate([(size.x/2 - wall_width/2) * n, 0, 0]) {
 	  cuboid([wall_width, size.y, size.z - face_depth + overlap], anchor=BOTTOM);
-	  up(size.z - face_depth - .5 ) tag("holes") 
+	  // sealing lip
+	  up(size.z - face_depth - 1 ) tag("holes") 
 	    cuboid([1 + tolerance * 2 + .05, 
 	            size.y - wall_width/2 - .5, 
-		    1 + overlap],
+		    1 + overlap + .9],
 		   anchor=BOTTOM);
 	}
       }
