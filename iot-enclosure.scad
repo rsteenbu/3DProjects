@@ -17,7 +17,7 @@ tolerance = .15;
 lip_width = 3;
 lip_height = 2;
 lcd_enabled = false;
-pir_enabled = false;
+pir_enabled = true;
 encoder_enabled = false;
 vents_enabled = false;
 screwhead_faceplate = true;
@@ -370,7 +370,8 @@ module faceplate(size) {
     }
     attach([TOP], overlap=overlap) {
       if (lcd_enabled) right(45) back(20) zrot(90) lcd_2x16();
-      if (pir_enabled) right(45) fwd(60) xrot(180) pir();
+      //if (pir_enabled) right(45) fwd(60) xrot(180) pir();
+      if (pir_enabled) xrot(180) pir();
 
       tag("holes") {
         if (encoder_enabled) back(15) right(10) cuboid([15, 34, 3])
