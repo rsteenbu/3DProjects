@@ -33,8 +33,8 @@ connector_pos_from_edge = 13;
 faceplate_depth = 18;
  
     //zrot(180) translate([3.3,-10,0]) pcb_mount("wasatch8", pcb_height=4);
-// 15w, 50w, 50w-2, 100w, 150w, RACM90, none, wasatch8, ssr, 8x-irrigation
-enclosure_type = "ssr";
+// 15w, 50w, 50w-2, 100w, 150w, RACM90, none, wasatch8, ssr, hiletgo, 8x-irrigation
+enclosure_type = "hiletgo";
 
 size_index = 1;
 pcb_details = 2;
@@ -57,6 +57,7 @@ enclosure_configs = [
                               ["beefcake_relay",    [-45,80],   90,  7]]],
     ["wasatch8",      [150, 150, 35], [["wasatch8", [3.3,-10,0], 0,  4]]],
     ["ssr",           [57, 95, 50],   [["70x50",    [0,0],       0,  35]]],
+    ["hiletgo",       [59, 95, 50],   [["70x50",    [0,3],       0,  32]]],
     ["8x-irrigation", [82, 120, 55],  [["70x50",    [0,0],       0,  7]]]
 ];
 
@@ -117,7 +118,7 @@ module back_wall_features(size) {
       }
     }
   }
-  if (enclosure_type == "ssr") {
+  if (enclosure_type == "ssr" || enclosure_type == "hiletgo") {
     attach(BACK, overlap=1)
     tag("holes") {
       translate([0, 0, 0]) nema5_15R_female(wall_width*2+1);
@@ -164,7 +165,7 @@ module front_wall_features(size) {
     }
   }
 
-  if (enclosure_type == "ssr") {
+  if (enclosure_type == "ssr" || enclosure_type == "hiletgo") {
     attach(BACK, overlap=1)
     tag("holes") {
       translate([0, 0, -3]) zrot(0) c14_plug_v2();
@@ -249,7 +250,11 @@ module component_mounts_for_enclosure(size) {
     // solid state relay on the bottom
     ssr_mount("EARU-ssr");
 
-    translate([0,20,0]) wago_holder_with_ears();
+  }
+
+  if (enclosure_type == "hiletgo") {
+    translate([-6.0,0,0]) pcb_mount("hiletgo_30A_relay", 4); 
+    translate([27.5,0,4]) xrot(90) yrot(-90) wago_holder_with_ears();
   }
 
   if (enclosure_type == "RACM90") {

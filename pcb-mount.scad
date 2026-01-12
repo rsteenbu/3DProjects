@@ -5,9 +5,6 @@ include <BOSL2/screws.scad>;
 // Global Configuration Parameters
 // ========================================
 
-// General settings
-print_pcb = false;           // Render PCB visualization
-
 // Clip mount configuration
 tolerance = 0.1;       // Clearance for PCB in clip mounts (mm)
 
@@ -16,20 +13,21 @@ sphere_fn = 45;             // $fn value for spheres
 cylinder_fn = 20;           // $fn value for cylinders (lower quality)
 
 // PCB Configuration Data Structure
-// Each PCB config is a vector: pcb_size, [hole_distance_x, hole_distance_y], mount_size, hole_diameter, hole_depth use_2_mount]
+// Each PCB config is a vector: pcb_size, [hole_distance_x, hole_distance_y], mount_size, hole_diameter, hole_depth]
 // use_2_mount: optional boolean, defaults to false if not specified
 PCB_CONFIGS = [
-//                   pcb_size          [hole_distance] mount_type, hole_diameter, hole_depth use_2_mount]
-  ["70x50",          [[50, 70, 1.6],   [46,66],        "screw",    1.94, 5,   false]],
-  ["relay",          [[25.5, 51],      [20,45.26],     "screw",    2,    5,   false]],
-  ["beefcake_relay", [[30.5, 62.3],    [25.50, 50.76], "screw",    3.25, 5,   false]],
-  ["wasatch8",       [[100, 100, 1.6], [93, 93],       "screw",    3.5,  5,   false]],
-  ["EARU-ssr",       [[45, 60],        [45, 49],       "screw",    3.3,  7.5, true]],
-  ["lm2596",         [[20.8, 43.7],    [15.28, 30.16], "screw", ,  3.25, 5,   true]] // DC-DC Converter LM2596
+//                       pcb_size          [hole_distance] mount_type, hole_diameter, hole_depth, print_pcb]
+  ["70x50",              [[50, 70, 1.6],   [46,66],        "screw",    1.94,          5,          false]],
+  ["relay",              [[25.5, 51],      [20,45.26],     "screw",    2,             5,          false]],
+  ["beefcake_relay",     [[30.5, 62.3],    [25.50, 50.76], "screw",    3.25,          5,          false]],
+  ["hiletgo_30A_relay",  [[40, 72, 1.6],   [34, 66.6],     "screw",    3.25,          5,          false]],
+  ["wasatch8",           [[100, 100, 1.6], [93, 93],       "screw",    3.5,           5,          false]],
+  ["EARU-ssr",           [[45, 60],        [45, 49],       "screw",    3.3,           7.5,        false]],
+  ["lm2596",             [[20.8, 43.7],    [15.28, 30.16], "screw", ,  3.25,          5,          false]] // DC-DC Converter LM2596
 ];
 
 mounts = [
-  ["screw",     [6.5,6.5,6.5] ],
+  ["screw",     [6.9,6.5,6.5] ],
   ["clip",      [8,8,4]     ],
   ["ssr_relay", [10,10,8]   ]
 ];
@@ -45,7 +43,7 @@ function get_pcb_hole_distance(pcb_name) = pcb_config(pcb_name)[1];
 function get_mount_type(pcb_name)        = pcb_config(pcb_name)[2];
 function get_pcb_hole_diameter(pcb_name) = pcb_config(pcb_name)[3];
 function get_pcb_hole_depth(pcb_name)    = pcb_config(pcb_name)[4];
-function get_pcb_2_mount(pcb_name)       = pcb_config(pcb_name)[5];
+function get_print_pcb(pcb_name)         = pcb_config(pcb_name)[5];
 
 // get mount size for general mounts
 function get_mount_size(name) =
@@ -62,6 +60,7 @@ module pcb_mount(name, pcb_height=7) {
   hole_distance = get_pcb_hole_distance(name);
   hole_diameter = get_pcb_hole_diameter(name);
   mount_size = get_pcb_mount_size(name);
+  print_pcb = get_print_pcb(name);
 
   if(print_pcb) color("lightgreen", .2) up (wall_width + pcb_height)
     cuboid(pcb_size, anchor=BOTTOM);
