@@ -1,6 +1,6 @@
 // --- Configurable Parameters ---
 //slot_configs = [ 3, 3 ];
-slot_configs = [ 3, 2 ];
+slot_configs = [ 3 ];
 
 // Tolerances (added to Wago dimensions to get cavity size)
 slot_clearance_x = -0.2;   // Clearance for width (X-axis) of Wago nut
@@ -11,7 +11,7 @@ slot_clearance_z = -0.1;   // Clearance for height of Wago nut
 wall_thickness_sides_outer = 2.0;  // Thickness of the outermost side walls
 wall_thickness_internal = 2.0;     // Thickness of walls between Wago nuts
 back_wall_thickness = 2.0;         // Thickness of the back wall
-base_thickness = 2;                // Thickness of the bottom plate
+base_thickness = 4;                // Thickness of the bottom plate
 
 // Lip Geometry (for snap-in)
 lip_overhang_top = 3.5;   // How much the top lip extends over the Wago
@@ -518,4 +518,3 @@ module wago_holder_with_ears() {
   }
 }
 
-wago_holder_with_ears();

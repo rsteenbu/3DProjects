@@ -4,6 +4,7 @@ include <powersupply-mount.scad>;
 include <box-connectors.scad>;
 include <pcb-mount.scad>;
 include <my-general-libraries.scad>;
+include <wago-holder.scad>;
 
 use_mounting_tabs = true;
 use_outdoor_connectors = true;
@@ -71,9 +72,9 @@ spacing = enclosure_size.x + 20;
 
 //pcb_size      = get_pcb_size(config[3]);
 
-print_enclosure = false;
+print_enclosure = true;
 print_faceplate = true;
-print_faceplate_seal = true;
+print_faceplate_seal = false;
 
 // Generate enclosure parts
 xdistribute(spacing=spacing) {
@@ -247,6 +248,8 @@ module component_mounts_for_enclosure(size) {
   if (enclosure_type == "ssr") {
     // solid state relay on the bottom
     ssr_mount("EARU-ssr");
+
+    translate([0,20,0]) wago_holder_with_ears();
   }
 
   if (enclosure_type == "RACM90") {
