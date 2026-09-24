@@ -57,18 +57,20 @@ module connector(connector_size, anchor) {
 module nema5_15R_female(wall_width) {
   nema_depth = wall_width+overlap;
   base_nema5_15_size=[18.3,16, nema_depth];
-  nema_clip_width=4;  //size to edge is 4.235
+  nema_clip_width=3.4;
   //nema_clip_notch_depth = 3.2;
   nema_clip_notch_depth = 3.0;
   nema_notch_edge_distance = 1;
-  clip_height=10;
+  clip_height=10.5;
 
   clip_notch_size=[clip_height,nema_clip_notch_depth,1.5+overlap];
 
   up(overlap/2) cuboid(base_nema5_15_size) {
-    attach(BACK, overlap=overlap) cuboid([9,nema_depth,7], anchor=BOTTOM);
+    attach(BACK, overlap=overlap) cuboid([9,nema_depth,6.5+overlap], anchor=BOTTOM); // top notch
+    // left wing
     attach(LEFT, overlap=overlap) left(3) cuboid([clip_height,nema_depth,nema_clip_width+overlap], anchor=BOTTOM)
       attach(TOP, overlap=overlap) back(nema_depth/2 - nema_clip_notch_depth/2) cuboid(clip_notch_size, anchor=BOTTOM);
+    // right wing
     attach(RIGHT, overlap=overlap) right(3) cuboid([clip_height,nema_depth,nema_clip_width+overlap], anchor=BOTTOM)
       attach(TOP, overlap=overlap) back(nema_depth/2 - nema_clip_notch_depth/2) cuboid(clip_notch_size, anchor=BOTTOM);
 

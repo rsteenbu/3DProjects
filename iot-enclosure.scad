@@ -57,7 +57,7 @@ enclosure_configs = [
                               ["beefcake_relay",    [-45,80],   90,  7]]],
     ["wasatch8",      [150, 150, 35], [["wasatch8", [3.3,-10,0], 0,  4]]],
     ["ssr",           [57, 95, 50],   [["70x50",    [0,0],       0,  35]]],
-    ["hiletgo",       [59, 95, 50],   [["70x50",    [0,3],       0,  32]]],
+    ["hiletgo",       [59, 115, 50],  [["70x50",    [0,11],      0,  32]]],
     ["8x-irrigation", [82, 120, 55],  [["70x50",    [0,0],       0,  7]]]
 ];
 
@@ -74,7 +74,7 @@ spacing = enclosure_size.x + 20;
 //pcb_size      = get_pcb_size(config[3]);
 
 print_enclosure = true;
-print_faceplate = true;
+print_faceplate = false;
 print_faceplate_seal = false;
 
 // Generate enclosure parts
@@ -116,12 +116,6 @@ module back_wall_features(size) {
         c14_plug_v2([27,19,9]);
         left(40) cylinder(h=9, r=6.25, anchor=BOTTOM);
       }
-    }
-  }
-  if (enclosure_type == "ssr" || enclosure_type == "hiletgo") {
-    attach(BACK, overlap=1)
-    tag("holes") {
-      translate([0, 0, 0]) nema5_15R_female(wall_width*2+1);
     }
   }
 }
@@ -168,7 +162,14 @@ module front_wall_features(size) {
   if (enclosure_type == "ssr" || enclosure_type == "hiletgo") {
     attach(BACK, overlap=1)
     tag("holes") {
-      translate([0, 0, -3]) zrot(0) c14_plug_v2();
+     // translate([0, 0, -3]) zrot(0) c14_plug_v2();
+      translate([-16.5, 0, -3]) zrot(90) c14_plug_v2();
+    }
+  }
+  if (enclosure_type == "ssr" || enclosure_type == "hiletgo") {
+    attach(BACK, overlap=1)
+    tag("holes") {
+      translate([12, 0, -2]) nema5_15R_female(wall_width*2+1);
     }
   }
 }
@@ -253,8 +254,9 @@ module component_mounts_for_enclosure(size) {
   }
 
   if (enclosure_type == "hiletgo") {
-    translate([-6.0,0,0]) pcb_mount("hiletgo_30A_relay", 4); 
-    translate([27.5,0,4]) xrot(90) yrot(-90) wago_holder_with_ears();
+    translate([-6.0,15,0]) pcb_mount("hiletgo_30A_relay", 4); 
+    translate([28,35,3]) xrot(90) yrot(-90) wago_holder_with_ears();
+    //translate([28,5,24]) xrot(180) yrot(-90) wago_holder_with_ears();
   }
 
   if (enclosure_type == "RACM90") {
