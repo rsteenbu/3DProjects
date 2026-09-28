@@ -2,11 +2,12 @@
 
 ## Functional Requirements
 **FR-1**: C-channel holder at top of stake
-**FR-2**: Horizontal protruding ridges on inner walls for texture/grip
+**FR-2**: Vertical protruding ridges on inner walls sandwhiching the gravestonefor texture/grip
 **FR-3**: Fits 2cm thick foam gravestone (with tolerance)
 **FR-4**: Tapered triangular stake for ground insertion that goes to a point
 **FR-4**: A face of the triangle is on the same plane as the closed side of the C-Channel for easy printing
 **FR-5**: designed for easy printing with minimal supports
+**FR-6**: Vertical protruding ridges on the remaining inner wall that holds the side of the gravestone
 
 ## Dimensional Requirements
 **DR-1**: Total stake height: 13cm (130mm)
