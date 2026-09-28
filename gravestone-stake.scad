@@ -21,8 +21,8 @@ $fs = 0.25;
 /* ---------- parameters ---------- */
 
 total_h       = 130;  // DR-1 overall height
-channel_h     = 30;   // DR-3 C-channel section (floor + walls)
-foam_t        = 20;   // DR-2 foam gravestone thickness
+channel_h     = 30;   // DR-3 C-channel section (floor + walls) (cm)
+foam_t        = 20;   // DR-2 foam gravestone thickness (mm)
 foam_gap      = 1;    // FR-3 slip fit on the foam
 channel_depth = 35;   // how far the gravestone sits into the channel (X)
 wall_t        = 3;    // back / left / right wall thickness
@@ -30,7 +30,7 @@ floor_t       = 4;    // channel floor - the stake stops here (AR-3)
 lead_in       = 1.0;  // chamfer at the mouth to guide the foam in (also thins
                       // the wall at the bed, so keep it well under wall_t)
 
-ridge_p       = 1;    // FR-2 how far the grip ridges bite into the foam
+ridge_p       = 2.5;    // (mm) FR-2 how far the grip ridges bite into the foam
 ridge_pitch   = 6;    // vertical spacing of the ridges
 ridge_inset   = 3;    // first ridge above the channel floor
 
@@ -39,7 +39,7 @@ stake_overlap = 1;    // AR-4 how far the stake buries into the floor
 
 show_stake    = true;    // false = C-channel only, for a quick fit-test print
 print_mode    = "flat";  // "flat" | "upright" | "none" - see the header
-show_gravestone = true;  // AR-3/DR-2 check: translucent 200 x 400 x 20 reference panel
+show_gravestone = false;  // AR-3/DR-2 check: translucent 200 x 400 x 20 reference panel
 
 /* ---------- derived ---------- */
 
